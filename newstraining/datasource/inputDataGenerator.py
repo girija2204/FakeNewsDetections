@@ -1,7 +1,7 @@
-from newsPortal.newsPortal.newstraining.datasource.inputDataSourceFactory import (
-    InputDataSourceFactory,
-)
-from newsPortal.newsPortal.newsPortal.settings import log
+from newstraining.datasource.inputDataSourceFactory import InputDataSourceFactory
+from django.conf import settings
+
+log = settings.LOG
 
 
 class InputDataGenerator:
@@ -16,8 +16,10 @@ class InputDataGenerator:
             InputDataGenerator.instance = InputDataGenerator.__InputDataGenerator(
                 fndContext
             )
+            log.debug(f"InputDataGenerator created")
         else:
             InputDataGenerator.instance.context = fndContext
+            log.debug(f"InputDataGenerator loaded")
 
     def __getattr__(self, item):
         return getattr(self.instance, item)
@@ -29,6 +31,9 @@ class InputDataGenerator:
             trainStartDate = context.get_trainStartDate()
             trainEndDate = context.get_trainEndDate()
             fndConfig = context.get_fndConfig()
+            log.debug(f"trainStartDate: {trainStartDate}")
+            log.debug(f"trainEndDate: {trainEndDate}")
+            log.debug(f"fndConfig: {fndConfig}")
             fndInputs = fndConfig.fndModel.fndinput_set.all()
             fndOutput = fndConfig.fndModel.fndoutput_set.first()
             # will be a loop as multiple inputs will participate in training
@@ -42,13 +47,18 @@ class InputDataGenerator:
             #             startDate=trainStartDate,
             #             endDate=trainEndDate,
             #         )
-            inputDataSourceFactory = InputDataSourceFactory()
-            dataSource = inputDataSourceFactory.getInputDataSource(fndInputs.first())
-            if dataSource is not None:
-                dataset = dataSource.getDataset(
-                    fndInput=fndInputs.first(),
-                    fndOutput=fndOutput,
-                    startDate=trainStartDate,
-                    endDate=trainEndDate,
-                )
+            dataset = []
+            for fndInput in fndInputs:
+                inputDataSourceFactory = InputDataSourceFactory()
+                dataSource = inputDataSourceFactory.getInputDataSource(fndInput)
+                if dataSource is not None:
+                    dataset.append(
+                        dataSource.getDataset(
+                            fndInput=fndInput,
+                            fndOutput=fndOutput,
+                            startDate=trainStartDate,
+                            endDate=trainEndDate,
+                        )
+                    )
+                log.debug(f"dataset: {dataset}")
             return dataset

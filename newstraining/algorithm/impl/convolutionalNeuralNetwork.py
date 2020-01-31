@@ -1,12 +1,12 @@
-from newsPortal.newsPortal.newstraining.training import trainingModule
+from newstraining.algorithm.abstractAlgorithm import AbstractAlgorithm
 
 
-class ConvolutionalNN(trainingModule.TrainingAlgorithm):
+class ConvolutionalNN(AbstractAlgorithm):
     def __init__(self):
         super().__init__()
 
-    def train(self):
+    def train(self, trainingInput, fndContext, embeddingMatrix=None):
         pass
 
-    def predict(self):
+    def predict(self, predictionInput, fndContext):
         pass

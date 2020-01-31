@@ -1,9 +1,14 @@
 from django.contrib import admin
-from .models.fndConfig import FNDConfig
-from .models import fndInput, fndModelAttribute, fndModel, fndOutput
+from newstraining.models import (
+    fndConfig,
+    fndInput,
+    fndModelAttribute,
+    fndModel,
+    fndOutput,
+)
 
 fndModels = [
-    FNDConfig,
+    fndConfig.FNDConfig,
     fndOutput.FNDOutput,
     fndModel.FNDModel,
     fndModelAttribute.FNDModelAttribute,

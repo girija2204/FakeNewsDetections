@@ -36,4 +36,5 @@ urlpatterns = [
     path("newsextractor/", include("newsextractor.urls")),
     path("", RedirectView.as_view(url="newsextractor/", permanent=True)),
     url(r"^api-auth/", include("rest_framework.urls")),
+    path("newstraining/", include("newstraining.urls")),
 ]

@@ -1,44 +1,47 @@
-from newsPortal.newsPortal.newsPortal.settings import log
-from newsPortal.newsPortal.newstraining.models.fndConfig import FNDConfig
-from newsPortal.newsPortal.newstraining.trainingUtil import TrainingUtil
+from django.conf import settings
+from newstraining.models.fndConfig import FNDConfig
+from newstraining.trainingUtil import TrainingUtil
+from newstraining.trainingEnums import TrainingEnums
+
+log = settings.LOG
 
 
 class FNDetectorDao:
-
-    configSection = "trainingConfigurations"
-    configKey = "trainingName"
-
     def __init__(self):
-        self.trainingName = ""
+        self.trainingAlgo = ""
         self.validate()
 
     def validate(self):
-        self.trainingName = TrainingUtil.getConfigAttribute(
-            configSection=self.configSection, configKey=self.configKey
+        self.trainingAlgo = TrainingUtil.getConfigAttribute(
+            configSection=TrainingEnums.TRAINING_CONFIGURATIONS.value,
+            configKey=TrainingEnums.TRAINING_ALGO.value,
         )
-        if self.trainingName:
-            log.error(
-                f"Configuration loaded - section: {self.configSection}"
-                f" and key: {self.configKey}"
+        if self.trainingAlgo:
+            log.debug(
+                f"Configuration loaded - section: {TrainingEnums.TRAINING_CONFIGURATIONS.value}"
+                f" and key: {TrainingEnums.TRAINING_ALGO.value} - trainingAlgo: {self.trainingAlgo}"
             )
         else:
-            log.error(
-                f"Invalid configuration provided - section: {self.configSection}"
-                f" and key: {self.configKey}"
+            log.debug(
+                f"Invalid configuration provided - section: {TrainingEnums.TRAINING_CONFIGURATIONS.value}"
+                f" and key: {TrainingEnums.TRAINING_ALGO.value}"
             )
-            raise KeyError
+            return None
 
     def getModelConfig(self):
-        if not self.trainingName:
+        if not self.trainingAlgo:
             log.debug(f"No training name")
-            return
+            return None
 
-        return FNDConfig.objects.filter(name=self.trainingName)
+        return FNDConfig.objects.filter(name=self.trainingAlgo).first()
 
     def getConfiguration(self):
         modelConfig = self.getModelConfig()
         if not modelConfig:
-            log.debug(f"No model configuration found")
-            return
+            log.debug(f"Invalid configurations provided")
+            return None
 
         return modelConfig
+
+    def getTrainingAlgo(self):
+        return self.trainingAlgo

@@ -17,7 +17,7 @@ import logging
 import configparser
 
 # import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", __file__)
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", __file__)
 # import django
 # django.setup()
 
@@ -137,9 +137,9 @@ LOGIN_URL = "portal-login"
 configurationFilePath = path.join(BASE_DIR, "configurations.ini")
 logging.config.fileConfig(configurationFilePath, disable_existing_loggers=False)
 
-log = logging
+LOG = logging
 
-configParser = configparser.ConfigParser()
-log.debug(f"ConfigParser created")
-configParser.read(configurationFilePath)
-log.debug(f"ConfigParser reading")
+CONFIG_PARSER = configparser.ConfigParser()
+LOG.debug(f"ConfigParser created")
+CONFIG_PARSER.read(configurationFilePath)
+LOG.debug(f"ConfigParser reading")

@@ -1,5 +1,5 @@
 from django.db import models
-from .fndModel import FNDModel
+from newstraining.models.fndModel import FNDModel
 
 
 class FNDOutput(models.Model):

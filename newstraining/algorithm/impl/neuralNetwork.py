@@ -3,31 +3,40 @@ from keras.layers import Flatten
 from keras.layers.core import Dense
 from keras.layers.embeddings import Embedding
 from keras.models import Sequential
-from newsPortal.newsPortal.newstraining.algorithm.abstractAlgorithm import AbstractAlgorithm
+from newsPortal.newsPortal.newstraining.algorithm.abstractAlgorithm import (
+    AbstractAlgorithm,
+)
 from newsPortal.newsPortal.newsPortal.settings import log
 from newsPortal.newsPortal.newstraining.trainingUtil import TrainingUtil
-from newsPortal.newsPortal.newstraining.preprocessor.contentPreprocessor import ContentPreprocessor
+from newsPortal.newsPortal.newstraining.preprocessor.contentPreprocessor import (
+    ContentPreprocessor,
+)
 
 
 class NeuralNetwork(AbstractAlgorithm):
     def __init__(self):
         super().__init__()
 
-    def train(self,trainingInput,fndContext,embeddingMatrix=None):
-        trainTestSplitRatio = super().getTrainingProperties("TRAIN_TEST_SPLIT_RATIO",fndContext)
+    def train(self, trainingInput, fndContext, embeddingMatrix=None):
+        trainTestSplitRatio = super().getTrainingProperties(
+            "TRAIN_TEST_SPLIT_RATIO", fndContext
+        )
         if not trainTestSplitRatio:
-            log.debug(f'Unable to train, as trainTestSplitRatio is not provided')
+            log.debug(f"Unable to train, as trainTestSplitRatio is not provided")
             return
         X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
             trainingInput[0], trainingInput[1], trainTestSplitRatio
         )
-        fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(trainingIndicator="Y").all()
+        fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
+            trainingIndicator="Y"
+        ).all()
         preprocessor = None
         for fndInput in fndInputs:
             if fndInput.variableName == "content":
                 preprocessor = ContentPreprocessor()
-        X_train, X_test, embedding_matrix = preprocessor.getEmbeddingMatrix(trainingInput, fndContext)
-
+        X_train, X_test, embedding_matrix = preprocessor.getEmbeddingMatrix(
+            trainingInput, fndContext
+        )
 
         model = Sequential()
         embedding_layer = Embedding(
@@ -71,6 +80,6 @@ class NeuralNetwork(AbstractAlgorithm):
         # plt.show()
         log.debug("Training over")
 
-    def predict(self,predictionInput,fndContext):
-        print(f'nisniibnisk kk')
+    def predict(self, predictionInput, fndContext):
+        print(f"nisniibnisk kk")
         pass

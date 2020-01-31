@@ -2,12 +2,17 @@ import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from newsPortal.newsPortal.newstraining.preprocessor.preprocessor import Preprocessor
+from newstraining.preprocessor.preprocessor import Preprocessor
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
+from django.conf import settings
+from newstraining.trainingUtil import TrainingUtil
 
-from newsPortal.newsPortal.newstraining.trainingUtil import TrainingUtil
+import pdb
+
+
+log = settings.LOG
 
 
 class ContentPreprocessor(Preprocessor):
@@ -22,9 +27,10 @@ class ContentPreprocessor(Preprocessor):
     def __init__(self):
         super().__init__()
         if not ContentPreprocessor.instance:
-            ContentPreprocessor.instance = (
-                ContentPreprocessor.__ContentPreprocessor()
-            )
+            ContentPreprocessor.instance = ContentPreprocessor.__ContentPreprocessor()
+            log.debug(f"ContentPreprocessor created")
+        else:
+            log.debug(f"ContentPreprocessor loaded")
 
     def setTokenizer(self, tokenizer):
         self.tokenizer = tokenizer
@@ -35,11 +41,13 @@ class ContentPreprocessor(Preprocessor):
     def __getattr__(self, item):
         return getattr(self.instance, item)
 
-    def removeSymbols(self, sen):
-        sentence = re.sub("[^a-zA-Z0-9]", " ", sen)
-        sentence = re.sub(r"\s+[a-zA-Z]\s+", " ", sentence)
-        sentence = re.sub(r"\s+", " ", sentence)
-        return sentence
+    def removeSymbols(self, data, columnName):
+        pdb.set_trace()
+        for content in data[columnName]:
+            content = re.sub("[^a-zA-Z0-9]", " ", content)
+            content = re.sub(r"\s+[a-zA-Z]\s+", " ", content)
+            content = re.sub(r"\s+", " ", content)
+        # return sentence
 
     def stemText(self, words):
         # ps = PorterStemmer()
@@ -60,7 +68,7 @@ class ContentPreprocessor(Preprocessor):
         return word_tokenize(sentence)
 
     def createTokenizer(self, X_train):
-        print('hello')
+        print("hello")
         tokenizer = Tokenizer(num_words=5000)
         tokenizer.fit_on_texts(X_train)
         self.setTokenizer(tokenizer)
@@ -97,14 +105,21 @@ class ContentPreprocessor(Preprocessor):
         X_test = pad_sequences(X_test, padding="post", maxlen=maxlen)
 
         embedding_dictionary = self.createWordEmbeddingDictionary()
-        embedding_matrix = self.createEmbeddingMatrix(embeddings_dictionary=embedding_dictionary, tokenizer=tokenizer)
+        embedding_matrix = self.createEmbeddingMatrix(
+            embeddings_dictionary=embedding_dictionary, tokenizer=tokenizer
+        )
 
         return X_train, X_test, embedding_matrix
 
-    def preprocess(self, sentences, fndContext):
-        print(f'preprocessing start with contentPreprocessor')
+    def preprocess(self, data, fndContext):
+        log.debug(f"preprocessing start with contentPreprocessor")
         filtered_sentences = []
-        for sentence, label in sentences:
+        # fndConfig = fndContext.get_fndConfig()
+        # fndInputs = fndConfig.fndModel.fndinput_set.all()
+        # fndOutput = fndConfig.fndModel.fndoutput_set.first()
+        self.removeSymbols(data, "content")
+        for sentence, label in enumerate(data):
+            log.debug(f"sentence: {sentence} and its label: {label}")
             sentence = self.removeSymbols(sentence)
             words = self.tokenizeSentence(sentence)
             filtered_words = self.removeStopWords(words)

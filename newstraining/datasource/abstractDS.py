@@ -2,10 +2,7 @@ class AbstractDS:
     def __init__(self):
         pass
 
-    def getData(self, dataset, columnNames):
-        pass
-
-    def getLabels(self, dataset, columnName):
+    def getLabelledData(self, dataset, columnNames):
         pass
 
     def getDataset(self, fndInput, fndOutput, startDate=None, endDate=None):

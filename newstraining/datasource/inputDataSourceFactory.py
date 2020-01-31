@@ -1,6 +1,9 @@
-from newsPortal.newsPortal.newstraining.datasource.impl.contentDS import ContentDS
-from newsPortal.newsPortal.newstraining.datasource.impl.authorDS import AuthorDS
-from newsPortal.newsPortal.newstraining.datasource.impl.titleDS import TitleDS
+from newstraining.datasource.impl.contentDS import ContentDS
+from newstraining.datasource.impl.authorDS import AuthorDS
+from newstraining.datasource.impl.titleDS import TitleDS
+from django.conf import settings
+
+log = settings.LOG
 
 
 class InputDataSourceFactory:
@@ -13,14 +16,18 @@ class InputDataSourceFactory:
     def __init__(self):
         if not InputDataSourceFactory.instance:
             InputDataSourceFactory.instance = (
-                InputDataSourceFactory.__InputDataGenerator()
+                InputDataSourceFactory.__InputDataSourceFactory()
             )
+            log.debug(f"InputDataSourceFactory created")
+        else:
+            log.debug(f"InputDataSourceFactory loaded")
 
     def __getattr__(self, item):
         return getattr(self.instance, item)
 
     def getInputDataSource(self, fndInput):
         dataSource = None
+        log.debug(f"fndInput: {fndInput}")
         if (
             fndInput.variableName.lower() == "content"
             and fndInput.trainingIndicator == "Y"
@@ -37,4 +44,5 @@ class InputDataSourceFactory:
         ):
             dataSource = TitleDS()
 
+        log.debug(f"datasource: {dataSource}")
         return dataSource

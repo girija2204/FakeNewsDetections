@@ -1,10 +1,10 @@
+from django.conf import settings
 from newsPortal.newsPortal.newstraining.ntDriver import FNDDriver
-from newsPortal.newsPortal.newsPortal.settings import log
-import os
+
+log = settings.LOG
 
 
 def main():
-    # os.environ.setdefault("DJANGO_SETTINGS_MODULE", ".settings")
     log.debug("hello logger")
     fndDriver = FNDDriver()
     fndDriver.run()

@@ -1,23 +1,22 @@
 import numpy as np
-from newsPortal.newsPortal.newsextractor.models import NewsArticle
-from newsPortal.newsPortal.newsPortal.settings import log
-from newsPortal.newsPortal.newstraining.datasource.abstractDS import AbstractDS
+from newsextractor.models import NewsArticle
+from django.conf import settings
+from newstraining.datasource.abstractDS import AbstractDS
+import pandas as pd
+
+log = settings.LOG
 
 
 class ContentDS(AbstractDS):
     def __init__(self):
         super().__init__()
 
-    def getData(self, dataset, columnName):
-        return dataset[columnName]
-
-    def getLabels(self, dataset, columnName):
-        labels = dataset[columnName]
-        labels = np.array(list(map(lambda x: 1 if x == False else 0, labels)))
-        return labels
+    def getLabelledData(self, dataset, columnNames):
+        return dataset[columnNames]
 
     def getDataFromDB(self, startDate=None, endDate=None):
         if startDate == None or endDate == None:
+            log.debug(f"startDate or endDate is None, so getting all the records")
             newsArticles = NewsArticle.objects.all()
         else:
             if startDate > endDate:
@@ -25,13 +24,20 @@ class ContentDS(AbstractDS):
                     f"Unable to fetch news articles as start date is after end date"
                 )
                 return
+            log.debug(
+                f"getting records between startDate: {startDate} and endDate: {endDate}"
+            )
             newsArticles = NewsArticle.objects.filter(
                 date_posted__range=[startDate, endDate]
             )
         return newsArticles
 
     def getDataset(self, fndInput, fndOutput, startDate=None, endDate=None):
+        log.debug(f"Inside contentDS")
         news_articles = self.getDataFromDB(startDate, endDate)
-        sentences = self.getData(news_articles, fndInput)
-        labels = self.getLabels(news_articles, columnName="fact_check")
-        return [sentences, labels]
+        log.debug(f"Content Dataset: {news_articles}")
+        dataset = pd.DataFrame.from_records(news_articles.values())
+        colNames = [fndInput.variableName.lower(), fndOutput.variableName.lower()]
+        labelledData = self.getLabelledData(dataset, colNames)
+        log.debug(f"labelledData: {labelledData}")
+        return labelledData
