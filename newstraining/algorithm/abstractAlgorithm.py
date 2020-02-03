@@ -1,6 +1,6 @@
 from django.conf import settings
 from newstraining.trainingUtil import TrainingUtil
-
+import pdb
 
 log = settings.LOG
 
@@ -29,5 +29,5 @@ class AbstractAlgorithm:
     def getTrainingProperties(self, propertyName, fndContext):
         fndModelAttribute = fndContext.fndConfig.fndModel.fndmodelattribute_set.filter(
             name=propertyName
-        )
-        return fndModelAttribute
+        ).first()
+        return fndModelAttribute.value

@@ -15,3 +15,4 @@ class TrainingEnums(Enum):
     EMBEDDING_DIRECTORY = "embeddingDirectory"
     EMBEDDING_FILENAME = "embeddingFileName"
     MAX_LENGTH_PADDING = "maxLengthForPadding"
+    TRAIN_TEST_SPLIT_RATIO = "TRAIN_TEST_SPLIT_RATIO"

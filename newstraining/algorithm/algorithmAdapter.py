@@ -1,6 +1,10 @@
 from newstraining.preprocessor.contentPreprocessor import ContentPreprocessor
 from django.conf import settings
 from newstraining.trainingUtil import TrainingUtil
+from newstraining.algorithm.impl.neuralNetwork import NeuralNetwork
+from newstraining.algorithm.impl.convolutionalNeuralNetwork import ConvolutionalNN
+from newstraining.algorithm.impl.lstm import LSTM
+import pdb
 
 log = settings.LOG
 
@@ -23,7 +27,7 @@ class AlgorithmAdapter:
         return getattr(self.instance, item)
 
     def initiateDetection(self, trainingInput, fndContext):
-        if not trainingInput or not fndContext:
+        if trainingInput.empty or not fndContext:
             log.debug(f"Initiation failed")
             return
         log.debug(f"Initiation")
@@ -39,7 +43,10 @@ class AlgorithmAdapter:
         if not fndAlgo:
             log.debug("training algo not configured. Cannot train further")
             return
-        fndAlgo.train(preprocessedTrainingInput, fndContext)
+        klass = globals()[fndAlgo]
+        algo = klass()
+
+        algo.train(preprocessedTrainingInput, fndContext)
 
     def getFNDAlgo(self):
         return TrainingUtil.getAlgo()

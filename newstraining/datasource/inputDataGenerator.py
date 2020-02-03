@@ -47,18 +47,16 @@ class InputDataGenerator:
             #             startDate=trainStartDate,
             #             endDate=trainEndDate,
             #         )
-            dataset = []
+            dataset = None
             for fndInput in fndInputs:
                 inputDataSourceFactory = InputDataSourceFactory()
                 dataSource = inputDataSourceFactory.getInputDataSource(fndInput)
                 if dataSource is not None:
-                    dataset.append(
-                        dataSource.getDataset(
-                            fndInput=fndInput,
-                            fndOutput=fndOutput,
-                            startDate=trainStartDate,
-                            endDate=trainEndDate,
-                        )
+                    dataset = dataSource.getDataset(
+                        fndInput=fndInput,
+                        fndOutput=fndOutput,
+                        startDate=trainStartDate,
+                        endDate=trainEndDate,
                     )
                 log.debug(f"dataset: {dataset}")
             return dataset

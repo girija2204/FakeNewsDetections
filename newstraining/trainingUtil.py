@@ -1,6 +1,8 @@
 from django.conf import settings
 from sklearn.model_selection import train_test_split
 from newstraining.trainingEnums import TrainingEnums
+import pdb
+import os
 
 configParser = settings.CONFIG_PARSER
 
@@ -23,25 +25,28 @@ class TrainingUtil:
 
     @staticmethod
     def getAlgo():
-        return TrainingUtil.getConfigAttribute(
-            TrainingEnums.TRAINING_CONFIGURATIONS, TrainingEnums.TRAINING_ALGO
+        algo = TrainingUtil.getConfigAttribute(
+            TrainingEnums.TRAINING_CONFIGURATIONS.value,
+            TrainingEnums.TRAINING_ALGO.value,
         )
+        return algo
 
     @staticmethod
     def getWordEmbeddingsFileName():
         embeddingLocation = TrainingUtil.getConfigAttribute(
-            TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS,
-            TrainingEnums.EMBEDDING_DIRECTORY,
+            TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS.value,
+            TrainingEnums.EMBEDDING_DIRECTORY.value,
         )
         embeddingFileName = TrainingUtil.getConfigAttribute(
-            TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS,
-            TrainingEnums.EMBEDDING_FILENAME,
+            TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS.value,
+            TrainingEnums.EMBEDDING_FILENAME.value,
         )
-        return embeddingLocation + embeddingFileName
+        embeddingFilePath = os.path.join(embeddingLocation, embeddingFileName)
+        return str(embeddingFilePath).replace('"', "")
 
     @staticmethod
     def getMaxLength():
         return TrainingUtil.getConfigAttribute(
-            TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS,
-            TrainingEnums.MAX_LENGTH_PADDING,
+            TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS.value,
+            TrainingEnums.MAX_LENGTH_PADDING.value,
         )

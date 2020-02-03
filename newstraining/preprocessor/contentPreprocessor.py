@@ -8,6 +8,7 @@ from keras.preprocessing.sequence import pad_sequences
 import numpy as np
 from django.conf import settings
 from newstraining.trainingUtil import TrainingUtil
+import pandas as pd
 
 import pdb
 
@@ -41,34 +42,37 @@ class ContentPreprocessor(Preprocessor):
     def __getattr__(self, item):
         return getattr(self.instance, item)
 
-    def removeSymbols(self, data, columnName):
-        pdb.set_trace()
-        for content in data[columnName]:
+    def removeSymbols(self, contentData, columnName):
+        for index, content in enumerate(contentData):
             content = re.sub("[^a-zA-Z0-9]", " ", content)
             content = re.sub(r"\s+[a-zA-Z]\s+", " ", content)
             content = re.sub(r"\s+", " ", content)
-        # return sentence
+            contentData.iloc[index] = content
+        return contentData
 
-    def stemText(self, words):
-        # ps = PorterStemmer()
+    def stemText(self, contentData):
         lemmatizer = WordNetLemmatizer()
-        # filtered_words = [ps.stem(w.lower()) for w in words if not w in stop_words]
-        filtered_words = [lemmatizer.lemmatize(w.lower()) for w in words]
-        return filtered_words
+        for index, content in enumerate(contentData):
+            stemmedContent = [lemmatizer.lemmatize(word.lower()) for word in content]
+            contentData.iloc[index] = " ".join(word for word in stemmedContent)
+        return contentData
 
-    def removeStopWords(self, words):
+    def removeStopWords(self, contentData):
         stop_words = set(stopwords.words("english"))
-        filtered_words = []
-        for w in words:
-            if not w in stop_words:
-                filtered_words.append(w)
-        return filtered_words
+        for index, content in enumerate(contentData):
+            filteredContent = []
+            for word in content:
+                if not word in stop_words:
+                    filteredContent.append(word)
+            contentData.iloc[index] = filteredContent
+        return contentData
 
-    def tokenizeSentence(self, sentence):
-        return word_tokenize(sentence)
+    def tokenizeSentence(self, contentData):
+        for index, content in enumerate(contentData):
+            contentData.iloc[index] = word_tokenize(content)
+        return contentData
 
     def createTokenizer(self, X_train):
-        print("hello")
         tokenizer = Tokenizer(num_words=5000)
         tokenizer.fit_on_texts(X_train)
         self.setTokenizer(tokenizer)
@@ -100,7 +104,11 @@ class ContentPreprocessor(Preprocessor):
     def getEmbeddingMatrix(self, X_train, X_test):
         tokenizer = self.createTokenizer(X_train)
 
-        maxlen = TrainingUtil.getMaxLength()
+        X_train = tokenizer.texts_to_sequences(X_train)
+        X_test = tokenizer.texts_to_sequences(X_test)
+
+        maxlen = int(TrainingUtil.getMaxLength())
+
         X_train = pad_sequences(X_train, padding="post", maxlen=maxlen)
         X_test = pad_sequences(X_test, padding="post", maxlen=maxlen)
 
@@ -108,21 +116,16 @@ class ContentPreprocessor(Preprocessor):
         embedding_matrix = self.createEmbeddingMatrix(
             embeddings_dictionary=embedding_dictionary, tokenizer=tokenizer
         )
-
         return X_train, X_test, embedding_matrix
 
     def preprocess(self, data, fndContext):
         log.debug(f"preprocessing start with contentPreprocessor")
-        filtered_sentences = []
-        # fndConfig = fndContext.get_fndConfig()
-        # fndInputs = fndConfig.fndModel.fndinput_set.all()
-        # fndOutput = fndConfig.fndModel.fndoutput_set.first()
-        self.removeSymbols(data, "content")
-        for sentence, label in enumerate(data):
-            log.debug(f"sentence: {sentence} and its label: {label}")
-            sentence = self.removeSymbols(sentence)
-            words = self.tokenizeSentence(sentence)
-            filtered_words = self.removeStopWords(words)
-            filtered_words = self.stemText(filtered_words)
-            filtered_sentence = " ".join(word for word in filtered_words)
-            filtered_sentences.append([filtered_sentence, label])
+        contentData = self.removeSymbols(data["content"], "content")
+        contentData = self.tokenizeSentence(contentData)
+        contentData = self.removeStopWords(contentData)
+        contentData = self.stemText(contentData)
+        filteredContentData = pd.DataFrame(columns=["content"], data=contentData)
+        label = pd.DataFrame(data["fake_status"])
+        filteredContentData = filteredContentData.join(label)
+        filteredContentData.columns = ["content", "label"]
+        return filteredContentData

@@ -10,7 +10,8 @@ def train(request):
     # if request.method == "POST":
     fndDriver = FNDDriver()
     fndDriver.run()
-    return "training done"
+    context = {"news_articles": "hello modekl", "title": "Portal - Homepage"}
+    return render(request, "newsextractor/home.html", context)
 
 
 if __name__ == "__main__":
