@@ -30,7 +30,7 @@ class AlgorithmAdapter:
         if trainingInput.empty or not fndContext:
             log.debug(f"Initiation failed")
             return
-        log.debug(f"Initiation")
+        log.debug(f"Algorithm Initiation")
         fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
             trainingIndicator="Y"
         ).all()

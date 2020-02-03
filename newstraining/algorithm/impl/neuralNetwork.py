@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from keras.layers import Flatten
 from keras.layers.core import Dense
 from keras.layers.embeddings import Embedding
-
-# from tensorflow.python.keras
 from keras.models import Sequential
 from newstraining.algorithm.abstractAlgorithm import AbstractAlgorithm
 from django.conf import settings
@@ -26,7 +24,9 @@ class NeuralNetwork(AbstractAlgorithm):
         if not trainTestSplitRatio:
             log.debug(f"Unable to train, as trainTestSplitRatio is not provided")
             return
-        pdb.set_trace()
+        log.debug(
+            f"Splitting the dataset: {trainTestSplitRatio} for test and {1-float(trainTestSplitRatio)} for train"
+        )
         X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
             trainingInput["content"], trainingInput["label"], float(trainTestSplitRatio)
         )
@@ -42,20 +42,11 @@ class NeuralNetwork(AbstractAlgorithm):
         )
 
         model = Sequential()
-
-        log.debug(f"type(embedding_matrix): {type(embedding_matrix)}")
-        pdb.set_trace()
-
         embedding_layer = Embedding(
-            # preprocessor.getVocabularySize(),
-            # 100,
-            # weights=[embedding_matrix],
-            # input_length=int(TrainingUtil.getMaxLength()),
-            # trainable=False,
             preprocessor.getVocabularySize(),
             100,
             weights=[embedding_matrix],
-            input_length=600,
+            input_length=int(TrainingUtil.getMaxLength()),
             trainable=False,
         )
         model.add(embedding_layer)

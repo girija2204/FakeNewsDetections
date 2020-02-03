@@ -35,9 +35,9 @@ class ContentDS(AbstractDS):
     def getDataset(self, fndInput, fndOutput, startDate=None, endDate=None):
         log.debug(f"Inside contentDS")
         news_articles = self.getDataFromDB(startDate, endDate)
-        log.debug(f"Content Dataset: {news_articles}")
+        # log.debug(f"Content Dataset: {news_articles}")
         dataset = pd.DataFrame.from_records(news_articles.values())
         colNames = [fndInput.variableName.lower(), fndOutput.variableName.lower()]
         labelledData = self.getLabelledData(dataset, colNames)
-        log.debug(f"labelledData: {labelledData}")
+        # log.debug(f"labelledData: {labelledData}")
         return labelledData

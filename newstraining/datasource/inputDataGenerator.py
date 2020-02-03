@@ -25,6 +25,7 @@ class InputDataGenerator:
         return getattr(self.instance, item)
 
     def generateInput(self, generateType):
+        log.debug(f"Generating input for tranining: {generateType}")
         if generateType == "training":
             dataset = None
             context = InputDataGenerator.instance.context
@@ -58,5 +59,5 @@ class InputDataGenerator:
                         startDate=trainStartDate,
                         endDate=trainEndDate,
                     )
-                log.debug(f"dataset: {dataset}")
+                # log.debug(f"dataset: {dataset}")
             return dataset

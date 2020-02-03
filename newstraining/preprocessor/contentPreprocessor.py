@@ -43,6 +43,7 @@ class ContentPreprocessor(Preprocessor):
         return getattr(self.instance, item)
 
     def removeSymbols(self, contentData, columnName):
+        log.debug(f"Removing unnecessary symbols")
         for index, content in enumerate(contentData):
             content = re.sub("[^a-zA-Z0-9]", " ", content)
             content = re.sub(r"\s+[a-zA-Z]\s+", " ", content)
@@ -51,6 +52,7 @@ class ContentPreprocessor(Preprocessor):
         return contentData
 
     def stemText(self, contentData):
+        log.debug(f"Stemming text")
         lemmatizer = WordNetLemmatizer()
         for index, content in enumerate(contentData):
             stemmedContent = [lemmatizer.lemmatize(word.lower()) for word in content]
@@ -58,6 +60,7 @@ class ContentPreprocessor(Preprocessor):
         return contentData
 
     def removeStopWords(self, contentData):
+        log.debug(f"Removing stop words")
         stop_words = set(stopwords.words("english"))
         for index, content in enumerate(contentData):
             filteredContent = []
@@ -68,6 +71,7 @@ class ContentPreprocessor(Preprocessor):
         return contentData
 
     def tokenizeSentence(self, contentData):
+        log.debug(f"Tokenizing sentences")
         for index, content in enumerate(contentData):
             contentData.iloc[index] = word_tokenize(content)
         return contentData
@@ -79,6 +83,7 @@ class ContentPreprocessor(Preprocessor):
         return tokenizer
 
     def createWordEmbeddingDictionary(self):
+        log.debug("Creating Word Embedding Dictionary from Glove")
         embeddings_dictionary = dict()
         glove_file = open(TrainingUtil.getWordEmbeddingsFileName(), encoding="utf8")
         for line in glove_file:
@@ -90,9 +95,11 @@ class ContentPreprocessor(Preprocessor):
         return embeddings_dictionary
 
     def getVocabularySize(self):
+        log.debug(f"Vocabulary size: len(self.getTokenizer().word_index) + 1")
         return len(self.getTokenizer().word_index) + 1
 
     def createEmbeddingMatrix(self, embeddings_dictionary, tokenizer):
+        log.debug(f"Creating word embedding matrix")
         embedding_matrix = np.zeros((self.getVocabularySize(), 100))
         for word, index in tokenizer.word_index.items():
             embedding_vector = embeddings_dictionary.get(word)
@@ -104,10 +111,12 @@ class ContentPreprocessor(Preprocessor):
     def getEmbeddingMatrix(self, X_train, X_test):
         tokenizer = self.createTokenizer(X_train)
 
+        log.debug(f"Converting X_train and X_test to sequences")
         X_train = tokenizer.texts_to_sequences(X_train)
         X_test = tokenizer.texts_to_sequences(X_test)
 
         maxlen = int(TrainingUtil.getMaxLength())
+        log.debug(f"Padding upto maxLegnth of Sequences: {maxlen}")
 
         X_train = pad_sequences(X_train, padding="post", maxlen=maxlen)
         X_test = pad_sequences(X_test, padding="post", maxlen=maxlen)

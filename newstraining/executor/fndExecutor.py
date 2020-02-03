@@ -22,7 +22,7 @@ class FNDExecutor:
     def execute(self, fndContext):
         inputDataGenerator = InputDataGenerator(fndContext)
         trainingInput = inputDataGenerator.generateInput("training")
-        pdb.set_trace()
+        # pdb.set_trace()
         algorithmAdapter = AlgorithmAdapter()
         algorithmAdapter.initiateDetection(
             trainingInput=trainingInput, fndContext=fndContext

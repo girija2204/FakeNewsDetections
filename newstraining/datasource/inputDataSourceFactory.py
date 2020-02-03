@@ -27,22 +27,26 @@ class InputDataSourceFactory:
 
     def getInputDataSource(self, fndInput):
         dataSource = None
-        log.debug(f"fndInput: {fndInput}")
+        log.debug(
+            f"fndInput: {fndInput.variableName.lower()} and trainingIndicator: {fndInput.trainingIndicator}"
+        )
         if (
             fndInput.variableName.lower() == "content"
             and fndInput.trainingIndicator == "Y"
         ):
             dataSource = ContentDS()
+            log.debug(f"DataSource: ContentDS")
         elif (
             fndInput.variableName.lower() == "author"
             and fndInput.trainingIndicator == "Y"
         ):
             dataSource = AuthorDS()
+            log.debug(f"DataSource: AuthorDS")
         if (
             fndInput.variableName.lower() == "title"
             and fndInput.trainingIndicator == "Y"
         ):
             dataSource = TitleDS()
+            log.debug(f"DataSource: TitleDS")
 
-        log.debug(f"datasource: {dataSource}")
         return dataSource
