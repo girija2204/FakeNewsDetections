@@ -40,3 +40,4 @@ tmtagsHistory
 *.sublime-workspace
 .bundle
 /keras/
+/db.sqlite3
