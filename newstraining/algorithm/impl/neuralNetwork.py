@@ -96,6 +96,7 @@ class NeuralNetwork(AbstractAlgorithm):
         for fndInput in fndInputs:
             if fndInput.variableName == "content":
                 preprocessor = ContentPreprocessor()
+                log.debug('Using contentPreprocessor')
         paddedX_test = preprocessor.getPaddedSequences(data=predictionInput)
         classPredicted = loadedModel.predict_classes(paddedX_test)
         log.debug(f'predicted class: {classPredicted}')
