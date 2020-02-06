@@ -65,23 +65,6 @@ class NeuralNetwork(AbstractAlgorithm):
         log.debug(f"Test score using baseline NN:{score[0] * 100}")
         log.debug(f"Test accuracy using baseline NN:{score[1] * 100}")
 
-        # plt.plot(history.history["acc"])
-        # plt.plot(history.history["val_acc"])
-        #
-        # plt.title("model accuracy")
-        # plt.ylabel("accuracy")
-        # plt.xlabel("epoch")
-        # plt.legend(["train", "test"], loc="upper left")
-        # plt.show()
-        #
-        # plt.plot(history.history["loss"])
-        # plt.plot(history.history["val_loss"])
-        #
-        # plt.title("model loss")
-        # plt.xlabel("epoch")
-        # plt.ylabel("loss")
-        # plt.legend(["train", "test"], loc="upper left")
-        # plt.show()
         log.debug("Saving the model")
         self.saveModel(model=model, fndContext=fndContext)
         log.debug("Training over")
