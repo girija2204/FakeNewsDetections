@@ -81,6 +81,8 @@ class NeuralNetwork(AbstractAlgorithm):
         # plt.ylabel("loss")
         # plt.legend(["train", "test"], loc="upper left")
         # plt.show()
+        log.debug("Saving the model")
+        self.saveModel(model=model,fndContext=fndContext)
         log.debug("Training over")
 
     def predict(self, predictionInput, fndContext):

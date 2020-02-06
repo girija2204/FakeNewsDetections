@@ -4,8 +4,10 @@ from django.conf import settings
 import pandas as pd
 import numpy as np
 from keras.models import Sequential
-import pdb
 from newsextractor.models import NewsArticle
+import datetime
+from newstraining.models.fndRunDetail import FNDRunDetail
+import pdb
 
 log = settings.LOG
 
@@ -20,6 +22,7 @@ class FNDExecutor:
         #     newsArticle.save()
 
     def execute(self, fndContext):
+        runStartTime = datetime.datetime.now()
         inputDataGenerator = InputDataGenerator(fndContext)
         trainingInput = inputDataGenerator.generateInput("training")
         # pdb.set_trace()
@@ -27,6 +30,25 @@ class FNDExecutor:
         algorithmAdapter.initiateDetection(
             trainingInput=trainingInput, fndContext=fndContext
         )
+        runEndTime = datetime.datetime.now()
+        self.saveFndRunDetail(fndContext=fndContext,runStartTime=runStartTime,runEndTime=runEndTime)
+
+    def saveFndRunDetail(
+        self,
+        fndContext,
+        runStartTime,
+        runEndTime,
+        historyStartTime=None,
+        historyEndTime=None,
+    ):
+        fndRunDetail = FNDRunDetail(
+            runStartTime=runStartTime,
+            runEndTime=runEndTime,
+            historyStartTime=historyStartTime,
+            historyEndTime=historyEndTime,
+            fndConfig=fndContext.fndConfig,
+        )
+        fndRunDetail.save()
 
     def getData(self, dataset, columnNames):
         textData = []
