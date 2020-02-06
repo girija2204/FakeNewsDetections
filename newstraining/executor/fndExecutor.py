@@ -23,21 +23,30 @@ class FNDExecutor:
 
     def execute(self, fndContext):
         runStartTime = datetime.datetime.now()
+        fndContext.runStartTime = runStartTime
+        log.debug(f"FND start time: {runStartTime}")
         inputDataGenerator = InputDataGenerator(fndContext)
         trainingInput = inputDataGenerator.generateInput("training")
-        # pdb.set_trace()
         algorithmAdapter = AlgorithmAdapter()
         algorithmAdapter.initiateDetection(
             trainingInput=trainingInput, fndContext=fndContext
         )
         runEndTime = datetime.datetime.now()
-        self.saveFndRunDetail(fndContext=fndContext,runStartTime=runStartTime,runEndTime=runEndTime)
+        fndContext.runEndTime = runEndTime
+        log.debug(f"FND end time: {runEndTime}")
+        self.saveFndRunDetail(
+            fndContext=fndContext,
+            runStartTime=runStartTime,
+            runEndTime=runEndTime,
+            modelFileName=fndContext.modelFileName,
+        )
 
     def saveFndRunDetail(
         self,
         fndContext,
         runStartTime,
         runEndTime,
+        modelFileName,
         historyStartTime=None,
         historyEndTime=None,
     ):
@@ -47,6 +56,7 @@ class FNDExecutor:
             historyStartTime=historyStartTime,
             historyEndTime=historyEndTime,
             fndConfig=fndContext.fndConfig,
+            modelFileName=modelFileName,
         )
         fndRunDetail.save()
 

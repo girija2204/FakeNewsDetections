@@ -108,24 +108,30 @@ class ContentPreprocessor(Preprocessor):
 
         return embedding_matrix
 
-    def getEmbeddingMatrix(self, X_train, X_test):
-        tokenizer = self.createTokenizer(X_train)
+    def getPaddedSequences(self, data):
+        tokenizer = self.getTokenizer()
+        if tokenizer is None:
+            tokenizer = self.createTokenizer(data)
 
-        log.debug(f"Converting X_train and X_test to sequences")
-        X_train = tokenizer.texts_to_sequences(X_train)
-        X_test = tokenizer.texts_to_sequences(X_test)
+        log.debug(f"Converting data to sequences")
+        sequenceData = tokenizer.texts_to_sequences(data)
 
         maxlen = int(TrainingUtil.getMaxLength())
         log.debug(f"Padding upto maxLegnth of Sequences: {maxlen}")
 
-        X_train = pad_sequences(X_train, padding="post", maxlen=maxlen)
-        X_test = pad_sequences(X_test, padding="post", maxlen=maxlen)
+        paddedSequenceData = pad_sequences(sequenceData, padding="post", maxlen=maxlen)
+        return paddedSequenceData
+
+    def getEmbeddingMatrix(self, data):
+        tokenizer = self.getTokenizer()
+        if tokenizer is None:
+            tokenizer = self.createTokenizer(data)
 
         embedding_dictionary = self.createWordEmbeddingDictionary()
         embedding_matrix = self.createEmbeddingMatrix(
             embeddings_dictionary=embedding_dictionary, tokenizer=tokenizer
         )
-        return X_train, X_test, embedding_matrix
+        return embedding_matrix
 
     def preprocess(self, data, fndContext):
         log.debug(f"preprocessing start with contentPreprocessor")

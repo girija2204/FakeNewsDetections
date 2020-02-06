@@ -2,8 +2,11 @@ from django.conf import settings
 from newstraining.trainingUtil import TrainingUtil
 from newstraining.configurationValidator import ConfigurationValidator
 import time
+import datetime
 import os
+from keras.models import load_model
 from newstraining.trainingEnums import TrainingEnums
+from newstraining.models.fndRunDetail import FNDRunDetail
 import pdb
 
 log = settings.LOG
@@ -11,27 +14,23 @@ basedir = settings.BASE_DIR
 
 
 class AbstractAlgorithm:
-    def __init__(self):
-        self.modelFilePath = ""
-        self.modelFileBaseName = ""
-        self.trainTestSplitRatio = ""
-        self.validate()
+    def __init__(self, fndContext):
+        self.validate(fndContext)
 
-    def validate(self):
-        ConfigurationValidator.isNotNull(self.modelFilePath)
-        ConfigurationValidator.isNotNull(self.trainTestSplitRatio)
-        ConfigurationValidator.isNotNull(self.modelFileBaseName)
-        ConfigurationValidator.isDirectory(self.modelFilePath)
+    def validate(self, fndContext):
+        ConfigurationValidator.isNotNull("modelFilePath", fndContext.modelFilePath)
+        ConfigurationValidator.isNotNull(
+            "trainTestSplitRatio", fndContext.trainTestSplitRatio
+        )
+        ConfigurationValidator.isNotNull(
+            "modelFileBaseName", fndContext.modelFileBasename
+        )
+        ConfigurationValidator.isDirectory("modelFilePath", fndContext.modelFilePath)
+        ConfigurationValidator.isNotNull("modelSaveType", fndContext.modelSaveType)
 
     def train(self, trainingInput, fndContext, embeddingMatrix=None):
-        trainTestSplitRatio = self.getTrainingProperties(
-            TrainingEnums.TRAIN_TEST_SPLIT_RATIO.value, fndContext
-        )
-        if not trainTestSplitRatio:
-            log.debug(f"Unable to train, as trainTestSplitRatio is not provided")
-            return
         X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
-            trainingInput[0], trainingInput[1], trainTestSplitRatio
+            trainingInput[0], trainingInput[1], fndContext.trainTestSplitRatio
         )
 
     def predict(self, predictionInput, fndContext):
@@ -40,73 +39,58 @@ class AbstractAlgorithm:
     def getTrainTestSplitRatio(self):
         self.getTrainTestSplitRatio()
 
-    def getTrainingProperties(self, propertyName, fndContext):
-        fndModelAttribute = fndContext.fndConfig.fndModel.fndmodelattribute_set.filter(
-            name=propertyName
-        ).first()
-        return fndModelAttribute.value
-
     def evaluateModel(self):
         pass
 
     def createModelFileName(self, fndContext):
-        modelFileBasename = self.getTrainingProperties(
-            TrainingEnums.MODEL_FILE_BASENAME.value, fndContext
+        modelFileName = str(
+            fndContext.modelFileBasename
+            + "_"
+            + fndContext.runStartTime.strftime(TrainingEnums.TIMESTAMP_FORMAT.value)
         )
-        if modelFileBasename is None or not modelFileBasename:
-            log.debug(f"Configuration Error")
-            return
-        timestr = time.strftime(TrainingEnums.TIMESTAMP_FORMAT.value)
-        modelFileName = str(modelFileBasename + "_" + timestr)
         return modelFileName
 
     def getModelFilePath(self, fndContext):
-        modelFilePath = self.getTrainingProperties(
-            TrainingEnums.MODEL_FILE_PATH.value, fndContext=fndContext
-        )
-        if modelFilePath is None or not modelFilePath:
-            log.debug(f"Configuration Error")
-            return
-        modelFullPath = os.path.join(basedir, modelFilePath)
+        modelFullPath = os.path.join(basedir, fndContext.modelFilePath)
         if not os.path.isdir(modelFullPath):
             log.debug(f"Invalid path provided")
             return
         return modelFullPath
 
-    def getModelFileExtension(self, fndContext):
-        modelSaveType = self.getTrainingProperties(
-            TrainingEnums.MODEL_SAVE_TYPE.value, fndContext=fndContext
-        )
-        if modelSaveType is None or not modelSaveType:
-            log.debug(f"Configuration Error")
-            return
-        if modelSaveType is TrainingEnums.H5_SAVE_TYPE.value:
-            return TrainingEnums.H5_EXTENSION.value
-        else:
-            return TrainingEnums.H5_EXTENSION.value
-
     def saveModel(self, model, fndContext):
         modelFileName = self.createModelFileName(fndContext=fndContext)
         modelFilePath = self.getModelFilePath(fndContext=fndContext)
-        modelFileExtension = self.getModelFileExtension(fndContext=fndContext)
-        savepath = f'{modelFilePath}+""+{modelFileName}+"."+{modelFileExtension}'
+        savepath = f"{modelFilePath}{modelFileName}.{fndContext.modelFileExtension}"
         try:
             model.save(savepath)
+            fndContext.modelFileName = modelFileName
             log.debug(f"Model saved at: {savepath}")
         except RuntimeError:
             log.debug(
                 f"Runtime error occured while saving the model file at: {savepath}"
             )
 
+    def getRecentRunDetail(self):
+        currentDate = datetime.datetime.now().date()
+        nextDate = currentDate + datetime.timedelta(days=1)
+        return (
+            FNDRunDetail.objects.filter(runStartTime__range=[currentDate, nextDate])
+            .order_by("-runStartTime")
+            .first()
+        )
+
     def loadModel(self, fndContext):
-        modelFileName = self.getModelFileName(fndContext=fndContext)
-        modelFilePath = self.getModelFilePath(fndContext=fndContext)
-        modelFileExtension = self.getModelFileExtension(fndContext=fndContext)
-        savepath = f'{modelFilePath}+""+{modelFileName}+"."+{modelFileExtension}'
-        try:
-            # model.save(savepath)
-            log.debug(f"Model saved at: {savepath}")
-        except RuntimeError:
-            log.debug(
-                f"Runtime error occured while saving the model file at: {savepath}"
-            )
+        recentRunDetail = self.getRecentRunDetail()
+        model = None
+        if recentRunDetail is not None:
+            modelFileName = recentRunDetail.modelFileName
+            modelFilePath = self.getModelFilePath(fndContext=fndContext)
+            loadpath = f"{modelFilePath}{modelFileName}.{fndContext.modelFileExtension}"
+            try:
+                model = load_model(loadpath)
+                log.debug(f"Model loaded from: {loadpath}")
+            except RuntimeError:
+                log.debug(
+                    f"Runtime error occured while loading the model file from: {loadpath}"
+                )
+        return model

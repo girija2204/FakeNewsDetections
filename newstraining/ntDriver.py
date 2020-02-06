@@ -42,12 +42,8 @@ class FNDDriver:
         )
         if startDate is None or startDate is "" or endDate is None or endDate is "":
             log.debug(f"No start date or end date")
-            fndContext = FNDContext(
-                fndConfig=configuration, trainStartDate=None, trainEndDate=None
-            )
+            fndContext = FNDContext(fndConfig=configuration)
         else:
             log.debug(f"startDate: {startDate}, endDate: {endDate}")
-            fndContext = FNDContext(
-                trainStartDate=startDate, trainEndDate=endDate, fndConfig=configuration
-            )
+            fndContext = FNDContext(fndConfig=configuration)
         return fndContext

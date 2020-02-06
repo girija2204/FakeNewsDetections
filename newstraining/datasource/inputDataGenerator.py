@@ -29,9 +29,9 @@ class InputDataGenerator:
         if generateType == "training":
             dataset = None
             context = InputDataGenerator.instance.context
-            trainStartDate = context.get_trainStartDate()
-            trainEndDate = context.get_trainEndDate()
-            fndConfig = context.get_fndConfig()
+            trainStartDate = context.trainStartDate
+            trainEndDate = context.trainEndDate
+            fndConfig = context.fndConfig
             log.debug(f"trainStartDate: {trainStartDate}")
             log.debug(f"trainEndDate: {trainEndDate}")
             log.debug(f"fndConfig: {fndConfig}")

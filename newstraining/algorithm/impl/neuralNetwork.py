@@ -14,21 +14,17 @@ log = settings.LOG
 
 
 class NeuralNetwork(AbstractAlgorithm):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, fndContext):
+        super().__init__(fndContext)
 
     def train(self, trainingInput, fndContext, embeddingMatrix=None):
-        trainTestSplitRatio = super().getTrainingProperties(
-            TrainingEnums.TRAIN_TEST_SPLIT_RATIO.value, fndContext
-        )
-        if not trainTestSplitRatio:
-            log.debug(f"Unable to train, as trainTestSplitRatio is not provided")
-            return
         log.debug(
-            f"Splitting the dataset: {trainTestSplitRatio} for test and {1-float(trainTestSplitRatio)} for train"
+            f"Splitting the dataset: {fndContext.trainTestSplitRatio} for test and {1-float(fndContext.trainTestSplitRatio)} for train"
         )
         X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
-            trainingInput["content"], trainingInput["label"], float(trainTestSplitRatio)
+            trainingInput["content"],
+            trainingInput["label"],
+            float(fndContext.trainTestSplitRatio),
         )
         fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
             trainingIndicator="Y"
@@ -37,9 +33,9 @@ class NeuralNetwork(AbstractAlgorithm):
         for fndInput in fndInputs:
             if fndInput.variableName == "content":
                 preprocessor = ContentPreprocessor()
-        X_train, X_test, embedding_matrix = preprocessor.getEmbeddingMatrix(
-            X_train=X_train, X_test=X_test
-        )
+        paddedX_train = preprocessor.getPaddedSequences(X_train)
+        paddedX_test = preprocessor.getPaddedSequences(X_test)
+        embedding_matrix = preprocessor.getEmbeddingMatrix(data=X_train)
 
         model = Sequential()
         embedding_layer = Embedding(
@@ -55,12 +51,17 @@ class NeuralNetwork(AbstractAlgorithm):
 
         model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["acc"])
         print(model.summary())
-        pdb.set_trace()
+        # pdb.set_trace()
         history = model.fit(
-            X_train, Y_train, batch_size=128, epochs=6, verbose=1, validation_split=0.2
+            paddedX_train,
+            Y_train,
+            batch_size=128,
+            epochs=6,
+            verbose=1,
+            validation_split=0.2,
         )
 
-        score = model.evaluate(X_test, Y_test, verbose=1)
+        score = model.evaluate(paddedX_test, Y_test, verbose=1)
         log.debug(f"Test score using baseline NN:{score[0] * 100}")
         log.debug(f"Test accuracy using baseline NN:{score[1] * 100}")
 
@@ -82,9 +83,18 @@ class NeuralNetwork(AbstractAlgorithm):
         # plt.legend(["train", "test"], loc="upper left")
         # plt.show()
         log.debug("Saving the model")
-        self.saveModel(model=model,fndContext=fndContext)
+        self.saveModel(model=model, fndContext=fndContext)
         log.debug("Training over")
 
     def predict(self, predictionInput, fndContext):
-        print(f"nisniibnisk kk")
-        pass
+        loadedModel = self.loadModel(fndContext=fndContext)
+        fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
+            trainingIndicator="Y"
+        ).all()
+        preprocessor = None
+        for fndInput in fndInputs:
+            if fndInput.variableName == "content":
+                preprocessor = ContentPreprocessor()
+        paddedX_test = preprocessor.getPaddedSequences(data=predictionInput)
+        classPredicted = loadedModel.predict_classes(paddedX_test)
+        return classPredicted

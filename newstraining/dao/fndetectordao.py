@@ -9,6 +9,7 @@ log = settings.LOG
 class FNDetectorDao:
     def __init__(self):
         self.trainingAlgo = ""
+        self.trainingName = ""
         self.validate()
 
     def validate(self):
