@@ -88,6 +88,7 @@ class NeuralNetwork(AbstractAlgorithm):
 
     def predict(self, predictionInput, fndContext):
         loadedModel = self.loadModel(fndContext=fndContext)
+        log.debug(f'model loaded')
         fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
             trainingIndicator="Y"
         ).all()
@@ -97,4 +98,5 @@ class NeuralNetwork(AbstractAlgorithm):
                 preprocessor = ContentPreprocessor()
         paddedX_test = preprocessor.getPaddedSequences(data=predictionInput)
         classPredicted = loadedModel.predict_classes(paddedX_test)
+        log.debug(f'predicted class: {classPredicted}')
         return classPredicted
