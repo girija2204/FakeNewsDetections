@@ -10,6 +10,12 @@ class FNDContext:
     modelFileExtension = None
     fndConfig = None
     modelFileName = None
+    processName = None
+    tokenizerFileBasename = None
+    tokenizerFilePath = None
+    tokenizerFileType = None
+    tokenizerFileExtension = None
+    tokenizerFileName = None
 
-    def __init__(self, fndConfig):
-        self.fndConfig = fndConfig
+    def __init__(self, processName):
+        self.processName = processName

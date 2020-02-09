@@ -33,9 +33,9 @@ class NeuralNetwork(AbstractAlgorithm):
         for fndInput in fndInputs:
             if fndInput.variableName == "content":
                 preprocessor = ContentPreprocessor()
+        embedding_matrix = preprocessor.getEmbeddingMatrix(data=X_train)
         paddedX_train = preprocessor.getPaddedSequences(X_train)
         paddedX_test = preprocessor.getPaddedSequences(X_test)
-        embedding_matrix = preprocessor.getEmbeddingMatrix(data=X_train)
 
         model = Sequential()
         embedding_layer = Embedding(
@@ -66,12 +66,13 @@ class NeuralNetwork(AbstractAlgorithm):
         log.debug(f"Test accuracy using baseline NN:{score[1] * 100}")
 
         log.debug("Saving the model")
+        self.saveTokenizer(tokenizer=preprocessor.tokenizer, fndContext=fndContext)
         self.saveModel(model=model, fndContext=fndContext)
         log.debug("Training over")
 
     def predict(self, predictionInput, fndContext):
         loadedModel = self.loadModel(fndContext=fndContext)
-        log.debug(f'model loaded')
+        log.debug(f"model loaded")
         fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
             trainingIndicator="Y"
         ).all()
@@ -79,8 +80,8 @@ class NeuralNetwork(AbstractAlgorithm):
         for fndInput in fndInputs:
             if fndInput.variableName == "content":
                 preprocessor = ContentPreprocessor()
-                log.debug('Using contentPreprocessor')
+                log.debug("Using contentPreprocessor")
         paddedX_test = preprocessor.getPaddedSequences(data=predictionInput)
         classPredicted = loadedModel.predict_classes(paddedX_test)
-        log.debug(f'predicted class: {classPredicted}')
+        log.debug(f"predicted class: {classPredicted}")
         return classPredicted

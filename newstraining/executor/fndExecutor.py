@@ -28,7 +28,7 @@ class FNDExecutor:
         inputDataGenerator = InputDataGenerator(fndContext)
         trainingInput = inputDataGenerator.generateInput("training")
         algorithmAdapter = AlgorithmAdapter()
-        algorithmAdapter.initiateDetection(
+        algorithmAdapter.initiateTraining(
             trainingInput=trainingInput, fndContext=fndContext
         )
         runEndTime = datetime.datetime.now()
@@ -39,6 +39,7 @@ class FNDExecutor:
             runStartTime=runStartTime,
             runEndTime=runEndTime,
             modelFileName=fndContext.modelFileName,
+            tokenizerFileName=fndContext.tokenizerFileName,
         )
 
     def saveFndRunDetail(
@@ -47,6 +48,7 @@ class FNDExecutor:
         runStartTime,
         runEndTime,
         modelFileName,
+        tokenizerFileName,
         historyStartTime=None,
         historyEndTime=None,
     ):
@@ -57,6 +59,7 @@ class FNDExecutor:
             historyEndTime=historyEndTime,
             fndConfig=fndContext.fndConfig,
             modelFileName=modelFileName,
+            tokenizerFileName=tokenizerFileName,
         )
         fndRunDetail.save()
 

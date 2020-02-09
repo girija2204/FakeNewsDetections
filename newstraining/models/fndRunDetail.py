@@ -8,6 +8,7 @@ class FNDRunDetail(models.Model):
     historyStartTime = models.DateTimeField(null=True)
     historyEndTime = models.DateTimeField(null=True)
     modelFileName = models.CharField(max_length=100, null=False)
+    tokenizerFileName = models.CharField(max_length=100, null=False)
     fndConfig = models.ForeignKey(FNDConfig, on_delete=models.CASCADE)
 
     def __str__(self):

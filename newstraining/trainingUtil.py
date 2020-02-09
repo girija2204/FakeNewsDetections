@@ -1,10 +1,15 @@
 from django.conf import settings
 from sklearn.model_selection import train_test_split
+
+from newstraining.models.fndRunDetail import FNDRunDetail
 from newstraining.trainingEnums import TrainingEnums
 import pdb
 import os
+import datetime
+import pickle
 
 configParser = settings.CONFIG_PARSER
+basedir = settings.BASE_DIR
 
 
 class TrainingUtil:
@@ -24,10 +29,10 @@ class TrainingUtil:
         return X_train, X_test, Y_train, Y_test
 
     @staticmethod
-    def getAlgo():
+    def getAlgoName():
         algo = TrainingUtil.getConfigAttribute(
             TrainingEnums.TRAINING_CONFIGURATIONS.value,
-            TrainingEnums.TRAINING_ALGO.value,
+            TrainingEnums.TRAINING_NAME.value,
         )
         return algo
 
@@ -50,3 +55,45 @@ class TrainingUtil:
             TrainingEnums.WORD_EMBEDDING_CONFIGURATIONS.value,
             TrainingEnums.MAX_LENGTH_PADDING.value,
         )
+
+    @staticmethod
+    def loadRecentRunDetail():
+        currentDate = datetime.datetime.now().date()
+        nextDate = currentDate + datetime.timedelta(days=1)
+        return (
+            FNDRunDetail.objects.filter(runStartTime__range=[currentDate, nextDate])
+            .order_by("-runStartTime")
+            .first()
+        )
+
+    @staticmethod
+    def loadTokenizer():
+        recentRunDetail = TrainingUtil.loadRecentRunDetail()
+        tokenizer = None
+        if recentRunDetail is not None:
+            tokenizerFileName = recentRunDetail.tokenizerFileName
+            tokenizerFilePath = (
+                recentRunDetail.fndConfig.fndModel.fndmodelattribute_set.filter(
+                    name=TrainingEnums.TOKENIZER_FILE_PATH.value
+                )
+                .first()
+                .value
+            )
+            tokenizerFileType = (
+                recentRunDetail.fndConfig.fndModel.fndmodelattribute_set.filter(
+                    name=TrainingEnums.TOKENIZER_FILE_TYPE.value
+                )
+                .first()
+                .value
+            )
+            tokenizerFileExtension = None
+            pdb.set_trace()
+            if tokenizerFileType == TrainingEnums.PICKLE_FILE_TYPE.value:
+                tokenizerFileExtension = TrainingEnums.PICKLE_EXTENSION.value
+            tokenizerFullPath = os.path.join(basedir, tokenizerFilePath)
+            loadPath = (
+                f"{tokenizerFullPath}{tokenizerFileName}.{tokenizerFileExtension}"
+            )
+            with open(loadPath, "rb") as handle:
+                tokenizer = pickle.load(handle)
+        return tokenizer

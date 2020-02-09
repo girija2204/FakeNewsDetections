@@ -1,5 +1,5 @@
 from django.conf import settings
-from newsPortal.newsPortal.newstraining.ntDriver import FNDDriver
+from newsPortal.newsPortal.newstraining.fndDriver import FNDDriver
 
 log = settings.LOG
 

@@ -33,12 +33,6 @@ class ContentPreprocessor(Preprocessor):
         else:
             log.debug(f"ContentPreprocessor loaded")
 
-    def setTokenizer(self, tokenizer):
-        self.tokenizer = tokenizer
-
-    def getTokenizer(self):
-        return self.tokenizer
-
     def __getattr__(self, item):
         return getattr(self.instance, item)
 
@@ -79,7 +73,11 @@ class ContentPreprocessor(Preprocessor):
     def createTokenizer(self, X_train):
         tokenizer = Tokenizer(num_words=5000)
         tokenizer.fit_on_texts(X_train)
-        self.setTokenizer(tokenizer)
+        x = tokenizer.word_index
+        # pdb.set_trace()
+        if self.tokenizer is not None:
+            self.tokenizer = None
+        self.tokenizer = tokenizer
         return tokenizer
 
     def createWordEmbeddingDictionary(self):
@@ -95,11 +93,12 @@ class ContentPreprocessor(Preprocessor):
         return embeddings_dictionary
 
     def getVocabularySize(self):
-        log.debug(f"Vocabulary size: len(self.getTokenizer().word_index) + 1")
-        return len(self.getTokenizer().word_index) + 1
+        log.debug(f"Vocabulary size: {len(self.tokenizer.word_index) + 1}")
+        return len(self.tokenizer.word_index) + 1
 
     def createEmbeddingMatrix(self, embeddings_dictionary, tokenizer):
         log.debug(f"Creating word embedding matrix")
+        # pdb.set_trace()
         embedding_matrix = np.zeros((self.getVocabularySize(), 100))
         for word, index in tokenizer.word_index.items():
             embedding_vector = embeddings_dictionary.get(word)
@@ -109,9 +108,12 @@ class ContentPreprocessor(Preprocessor):
         return embedding_matrix
 
     def getPaddedSequences(self, data):
-        tokenizer = self.getTokenizer()
-        if tokenizer is None:
-            tokenizer = self.createTokenizer(data)
+        if self.tokenizer is not None:
+            log.debug(f"Tokenizer is already set")
+            tokenizer = self.tokenizer
+        else:
+            log.debug(f"No tokenizer is set, so loading it from last training run")
+            tokenizer = TrainingUtil.loadTokenizer()
 
         log.debug(f"Converting data to sequences")
         sequenceData = tokenizer.texts_to_sequences(data)
@@ -123,9 +125,10 @@ class ContentPreprocessor(Preprocessor):
         return paddedSequenceData
 
     def getEmbeddingMatrix(self, data):
-        tokenizer = self.getTokenizer()
-        if tokenizer is None:
-            tokenizer = self.createTokenizer(data)
+        # pdb.set_trace()
+        # tokenizer = self.tokenizer
+        # if tokenizer is None:
+        tokenizer = self.createTokenizer(data)
 
         embedding_dictionary = self.createWordEmbeddingDictionary()
         embedding_matrix = self.createEmbeddingMatrix(
@@ -135,12 +138,16 @@ class ContentPreprocessor(Preprocessor):
 
     def preprocess(self, data, fndContext):
         log.debug(f"preprocessing start with contentPreprocessor")
+        # pdb.set_trace()
         contentData = self.removeSymbols(data["content"], "content")
         contentData = self.tokenizeSentence(contentData)
         contentData = self.removeStopWords(contentData)
         contentData = self.stemText(contentData)
         filteredContentData = pd.DataFrame(columns=["content"], data=contentData)
-        label = pd.DataFrame(data["fake_status"])
-        filteredContentData = filteredContentData.join(label)
-        filteredContentData.columns = ["content", "label"]
+        if fndContext.processName == "training":
+            label = pd.DataFrame(data["fake_status"])
+            filteredContentData = filteredContentData.join(label)
+            filteredContentData.columns = ["content", "label"]
+        else:
+            filteredContentData.columns = ["content"]
         return filteredContentData

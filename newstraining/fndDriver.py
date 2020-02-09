@@ -4,6 +4,7 @@ from newstraining.executor.fndExecutor import FNDExecutor
 from newstraining.fndContext import FNDContext
 from newstraining.trainingUtil import TrainingUtil
 from newstraining.trainingEnums import TrainingEnums
+import pdb
 
 log = settings.LOG
 
@@ -15,14 +16,10 @@ class FNDDriver:
     def run(self):
         log.debug(f"Inside ntDriver run")
         dao = FNDetectorDao()
-        if not dao.getTrainingAlgo():
-            log.debug(f"Training incomplete due to invalid configuration")
-            return
         configuration = dao.getConfiguration()
         if not configuration:
             log.debug(f"Training incomplete due to invalid configuration")
             return
-        log.debug(f"Configuration Loaded: {configuration}")
         fndContext = self.getFNDContext(configuration)
         self.process(fndContext)
 
@@ -31,7 +28,6 @@ class FNDDriver:
         fndExecutor.execute(fndContext)
 
     def getFNDContext(self, configuration):
-        startDate, endDate = None, None
         startDate = TrainingUtil.getConfigAttribute(
             configSection=TrainingEnums.TRAINING_CONTEXT.value,
             configKey=TrainingEnums.TRAINING_STARTDATE.value,
@@ -40,10 +36,18 @@ class FNDDriver:
             configSection=TrainingEnums.TRAINING_CONTEXT.value,
             configKey=TrainingEnums.TRAINING_ENDDATE.value,
         )
-        if startDate is None or startDate is "" or endDate is None or endDate is "":
-            log.debug(f"No start date or end date")
-            fndContext = FNDContext(fndConfig=configuration)
+        fndContext = FNDContext(processName="training")
+        fndContext.fndConfig = configuration
+        # pdb.set_trace()
+        if (
+            startDate is not None
+            and startDate is not ""
+            and endDate is not None
+            and endDate is not ""
+        ):
+            fndContext.trainStartDate = startDate
+            fndContext.trainEndDate = endDate
+            log.debug(f"Training Start Date: {startDate}, Training End Date: {endDate}")
         else:
-            log.debug(f"startDate: {startDate}, endDate: {endDate}")
-            fndContext = FNDContext(fndConfig=configuration)
+            log.debug(f"No start date or end date")
         return fndContext

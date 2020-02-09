@@ -1,19 +1,21 @@
 import os
 import pdb
+from newstraining.exceptions.configurationException import ConfigurationException
+from newstraining.exceptions.invalidPathException import InvalidPathException
 
 
 class ConfigurationValidator:
     @staticmethod
     def isNotNull(key, configurationObject):
         if configurationObject is None:
-            print(f"configuration error for: {key}")
+            raise ConfigurationException(f"configuration error for: {key}")
 
     @staticmethod
     def isDirectory(key, path):
         if not os.path.isdir(path):
-            print(f"the provided path does not exist: {key}")
-            return
+            raise InvalidPathException(f"the path provided does not exist: {key}")
 
         if not os.access(path, os.R_OK | os.W_OK):
-            print(f"the provided path has no read and write permissions: {key}")
-            return
+            raise PermissionError(
+                f"the provided path has no read and write permissions: {key}"
+            )

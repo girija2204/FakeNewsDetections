@@ -7,6 +7,7 @@ import os
 from keras.models import load_model
 from newstraining.trainingEnums import TrainingEnums
 from newstraining.models.fndRunDetail import FNDRunDetail
+import pickle
 import pdb
 
 log = settings.LOG
@@ -27,6 +28,24 @@ class AbstractAlgorithm:
         )
         ConfigurationValidator.isDirectory("modelFilePath", fndContext.modelFilePath)
         ConfigurationValidator.isNotNull("modelSaveType", fndContext.modelSaveType)
+        ConfigurationValidator.isNotNull(
+            "tokenizerFileBaseName", fndContext.tokenizerFileBasename
+        )
+        ConfigurationValidator.isNotNull(
+            "tokenizerFilePath", fndContext.tokenizerFilePath
+        )
+        ConfigurationValidator.isDirectory(
+            "tokenizerFilePath", fndContext.tokenizerFilePath
+        )
+        ConfigurationValidator.isNotNull(
+            "tokenizerFileType", fndContext.tokenizerFileType
+        )
+        ConfigurationValidator.isNotNull(
+            "modelFileExtension", fndContext.modelFileExtension
+        )
+        ConfigurationValidator.isNotNull(
+            "tokenizerFileExtension", fndContext.tokenizerFileExtension
+        )
 
     def train(self, trainingInput, fndContext, embeddingMatrix=None):
         X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
@@ -57,6 +76,13 @@ class AbstractAlgorithm:
             return
         return modelFullPath
 
+    def getTokenizerFilePath(self, fndContext):
+        tokenizerFullPath = os.path.join(basedir, fndContext.tokenizerFilePath)
+        if not os.path.isdir(tokenizerFullPath):
+            log.debug(f"Invalid path provided")
+            return
+        return tokenizerFullPath
+
     def saveModel(self, model, fndContext):
         modelFileName = self.createModelFileName(fndContext=fndContext)
         modelFilePath = self.getModelFilePath(fndContext=fndContext)
@@ -70,17 +96,27 @@ class AbstractAlgorithm:
                 f"Runtime error occured while saving the model file at: {savepath}"
             )
 
-    def getRecentRunDetail(self):
-        currentDate = datetime.datetime.now().date()
-        nextDate = currentDate + datetime.timedelta(days=1)
-        return (
-            FNDRunDetail.objects.filter(runStartTime__range=[currentDate, nextDate])
-            .order_by("-runStartTime")
-            .first()
+    def createTokenizerFileName(self, fndContext):
+        pdb.set_trace()
+        return str(
+            fndContext.tokenizerFileBasename
+            + "_"
+            + fndContext.runStartTime.strftime(TrainingEnums.TIMESTAMP_FORMAT.value)
         )
 
+    def saveTokenizer(self, tokenizer, fndContext):
+        tokenizerFileName = self.createTokenizerFileName(fndContext=fndContext)
+        tokenizerFilePath = self.getTokenizerFilePath(fndContext)
+        savePath = f"{tokenizerFilePath}{tokenizerFileName}.{fndContext.tokenizerFileExtension}"
+        try:
+            with open(savePath, "wb") as handle:
+                pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            fndContext.tokenizerFileName = tokenizerFileName
+        except FileNotFoundError:
+            raise FileNotFoundError("runtime exception while saving the tokenizer file")
+
     def loadModel(self, fndContext):
-        recentRunDetail = self.getRecentRunDetail()
+        recentRunDetail = TrainingUtil.loadRecentRunDetail()
         model = None
         if recentRunDetail is not None:
             modelFileName = recentRunDetail.modelFileName

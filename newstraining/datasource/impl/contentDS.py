@@ -3,6 +3,7 @@ from newsextractor.models import NewsArticle
 from django.conf import settings
 from newstraining.datasource.abstractDS import AbstractDS
 import pandas as pd
+import pdb
 
 log = settings.LOG
 
@@ -32,12 +33,14 @@ class ContentDS(AbstractDS):
             )
         return newsArticles
 
-    def getDataset(self, fndInput, fndOutput, startDate=None, endDate=None):
+    def getDataset(self, fndContext, fndInput, fndOutput, startDate=None, endDate=None):
         log.debug(f"Inside contentDS")
         news_articles = self.getDataFromDB(startDate, endDate)
-        # log.debug(f"Content Dataset: {news_articles}")
         dataset = pd.DataFrame.from_records(news_articles.values())
-        colNames = [fndInput.variableName.lower(), fndOutput.variableName.lower()]
+        # pdb.set_trace()
+        if fndContext.processName == "training":
+            colNames = [fndInput.variableName.lower(), fndOutput.variableName.lower()]
+        else:
+            colNames = [fndInput.variableName.lower()]
         labelledData = self.getLabelledData(dataset, colNames)
-        # log.debug(f"labelledData: {labelledData}")
         return labelledData

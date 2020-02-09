@@ -54,6 +54,7 @@ class InputDataGenerator:
                 dataSource = inputDataSourceFactory.getInputDataSource(fndInput)
                 if dataSource is not None:
                     dataset = dataSource.getDataset(
+                        fndContext=context,
                         fndInput=fndInput,
                         fndOutput=fndOutput,
                         startDate=trainStartDate,
