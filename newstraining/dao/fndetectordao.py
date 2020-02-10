@@ -22,6 +22,7 @@ class FNDetectorDao:
             configSection=TrainingEnums.TRAINING_CONFIGURATIONS.value,
             configKey=TrainingEnums.TRAINING_NAME.value,
         )
+        # pdb.set_trace()
         self.validate()
         log.debug(
             f"Configuration file loaded: {self.trainingName}, {self.trainingAlgo}"

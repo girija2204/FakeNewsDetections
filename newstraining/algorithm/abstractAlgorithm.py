@@ -47,10 +47,11 @@ class AbstractAlgorithm:
             "tokenizerFileExtension", fndContext.tokenizerFileExtension
         )
 
-    def train(self, trainingInput, fndContext, embeddingMatrix=None):
-        X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
-            trainingInput[0], trainingInput[1], fndContext.trainTestSplitRatio
-        )
+    def train(self, X_train, Y_train, fndContext, embeddingLayer=None):
+        # X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
+        #     trainingInput[0], trainingInput[1], fndContext.trainTestSplitRatio
+        # )
+        pass
 
     def predict(self, predictionInput, fndContext):
         pass
@@ -58,7 +59,7 @@ class AbstractAlgorithm:
     def getTrainTestSplitRatio(self):
         self.getTrainTestSplitRatio()
 
-    def evaluateModel(self):
+    def evaluateModel(self, model, X_test, Y_test, fndContext):
         pass
 
     def createModelFileName(self, fndContext):
@@ -97,7 +98,7 @@ class AbstractAlgorithm:
             )
 
     def createTokenizerFileName(self, fndContext):
-        pdb.set_trace()
+        # pdb.set_trace()
         return str(
             fndContext.tokenizerFileBasename
             + "_"

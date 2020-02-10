@@ -87,7 +87,7 @@ class TrainingUtil:
                 .value
             )
             tokenizerFileExtension = None
-            pdb.set_trace()
+            # pdb.set_trace()
             if tokenizerFileType == TrainingEnums.PICKLE_FILE_TYPE.value:
                 tokenizerFileExtension = TrainingEnums.PICKLE_EXTENSION.value
             tokenizerFullPath = os.path.join(basedir, tokenizerFilePath)

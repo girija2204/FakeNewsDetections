@@ -9,6 +9,7 @@ import numpy as np
 from django.conf import settings
 from newstraining.trainingUtil import TrainingUtil
 import pandas as pd
+from keras.layers.embeddings import Embedding
 
 import pdb
 
@@ -151,3 +152,13 @@ class ContentPreprocessor(Preprocessor):
         else:
             filteredContentData.columns = ["content"]
         return filteredContentData
+
+    def getEmbeddingLayer(self, embeddingMatrix):
+        embedding_layer = Embedding(
+            self.getVocabularySize(),
+            100,
+            weights=[embeddingMatrix],
+            input_length=int(TrainingUtil.getMaxLength()),
+            trainable=False,
+        )
+        return embedding_layer

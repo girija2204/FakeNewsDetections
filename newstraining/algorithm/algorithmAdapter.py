@@ -5,7 +5,7 @@ from newstraining.trainingEnums import TrainingEnums
 from newstraining.trainingUtil import TrainingUtil
 from newstraining.algorithm.impl.neuralNetwork import NeuralNetwork
 from newstraining.algorithm.impl.convolutionalNeuralNetwork import ConvolutionalNN
-from newstraining.algorithm.impl.lstm import LSTM
+from newstraining.algorithm.impl.lstmAlgo import LSTMAlgo
 from newstraining.algorithm.abstractAlgorithm import AbstractAlgorithm
 from keras.models import load_model
 from newstraining.exceptions.invalidPathException import InvalidPathException
@@ -51,12 +51,74 @@ class AlgorithmAdapter:
         if not fndAlgoName:
             log.debug("training algo not configured. Cannot train further")
             return
+        # pdb.set_trace()
         klass = globals()[fndAlgoName]
         fndContext.trainTestSplitRatio = float(
             self.getTrainingProperties(
                 TrainingEnums.TRAIN_TEST_SPLIT_RATIO.value, fndContext
             )
         )
+
+        log.debug(
+            f"Splitting the dataset: {fndContext.trainTestSplitRatio} for test and {1 - float(fndContext.trainTestSplitRatio)} for train"
+        )
+        X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
+            preprocessedTrainingInput["content"],
+            preprocessedTrainingInput["label"],
+            float(fndContext.trainTestSplitRatio),
+        )
+        fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
+            trainingIndicator="Y"
+        ).all()
+        preprocessor = None
+        for fndInput in fndInputs:
+            if fndInput.variableName == "content":
+                preprocessor = ContentPreprocessor()
+        embedding_matrix = preprocessor.getEmbeddingMatrix(data=X_train)
+        paddedX_train = preprocessor.getPaddedSequences(X_train)
+        paddedX_test = preprocessor.getPaddedSequences(X_test)
+
+        embedding_layer = preprocessor.getEmbeddingLayer(embedding_matrix)
+
+        fndContext = self.populateFndContext(fndContext=fndContext)
+
+        algo = klass(fndContext)
+        model = algo.train(
+            paddedX_train,
+            Y_train=Y_train,
+            fndContext=fndContext,
+            embeddingLayer=embedding_layer,
+        )
+
+        log.debug("Saving the tokenizer")
+        algo.saveTokenizer(tokenizer=preprocessor.tokenizer, fndContext=fndContext)
+        log.debug("Saving the model")
+        algo.saveModel(model=model, fndContext=fndContext)
+
+        log.debug("Evaluating the model on test data set")
+        algo.evaluateModel(model, paddedX_test, Y_test, fndContext)
+        log.debug("Training over")
+
+    def getFNDAlgoName(self):
+        return TrainingUtil.getAlgoName()
+
+    def getTrainingProperties(self, propertyName, fndContext):
+        fndModelAttribute = fndContext.fndConfig.fndModel.fndmodelattribute_set.filter(
+            name=propertyName
+        ).first()
+        return fndModelAttribute.value
+
+    def getModelFileExtension(self, fndContext):
+        if fndContext.modelSaveType == TrainingEnums.H5_SAVE_TYPE.value:
+            return TrainingEnums.H5_EXTENSION.value
+        else:
+            return TrainingEnums.H5_EXTENSION.value
+
+    def getTokenizerFileExtension(self, fndContext):
+        if fndContext.tokenizerFileType == TrainingEnums.PICKLE_FILE_TYPE.value:
+            return TrainingEnums.PICKLE_EXTENSION.value
+
+    def populateFndContext(self, fndContext):
         fndContext.modelFileBasename = self.getTrainingProperties(
             TrainingEnums.MODEL_FILE_BASENAME.value, fndContext
         )
@@ -79,28 +141,7 @@ class AlgorithmAdapter:
             TrainingEnums.TOKENIZER_FILE_TYPE.value, fndContext
         )
         fndContext.tokenizerFileExtension = self.getTokenizerFileExtension(fndContext)
-
-        algo = klass(fndContext)
-        algo.train(preprocessedTrainingInput, fndContext)
-
-    def getFNDAlgoName(self):
-        return TrainingUtil.getAlgoName()
-
-    def getTrainingProperties(self, propertyName, fndContext):
-        fndModelAttribute = fndContext.fndConfig.fndModel.fndmodelattribute_set.filter(
-            name=propertyName
-        ).first()
-        return fndModelAttribute.value
-
-    def getModelFileExtension(self, fndContext):
-        if fndContext.modelSaveType == TrainingEnums.H5_SAVE_TYPE.value:
-            return TrainingEnums.H5_EXTENSION.value
-        else:
-            return TrainingEnums.H5_EXTENSION.value
-
-    def getTokenizerFileExtension(self, fndContext):
-        if fndContext.tokenizerFileType == TrainingEnums.PICKLE_FILE_TYPE.value:
-            return TrainingEnums.PICKLE_EXTENSION.value
+        return fndContext
 
     def initiatePrediction(self, predictionInput, fndContext):
         if predictionInput.empty or not fndContext:

@@ -5,7 +5,7 @@ from django.conf import settings
 from newsextractor.models import NewsArticle
 from newstraining.fndDriver import FNDDriver
 from .forms import NewsArticlePredictionForm
-from django.views.generic import FormView
+from django.views.generic import FormView, DetailView
 from newstraining.fndContext import FNDContext
 from newstraining.algorithm.algorithmAdapter import AlgorithmAdapter
 import pandas as pd
@@ -33,7 +33,7 @@ def predict(request):
     return render(request, "newsextractor/home.html", context)
 
 
-class NewsArticlePredictionView(LoginRequiredMixin, FormView):
+class NewsArticlePredictionFormView(FormView):
     form_class = NewsArticlePredictionForm
     template_name = "newstraining/prediction-form.html"
     success_url = "newstraining/home.html"
@@ -56,6 +56,9 @@ class NewsArticlePredictionView(LoginRequiredMixin, FormView):
         )
         log.debug(f"Predicted class is: {classPredicted}")
         return super().form_valid(form)
+
+
+# class NewsArticlePredictionDetailView(LoginRequiredMixin, DetailView):
 
 
 if __name__ == "__main__":
