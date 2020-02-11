@@ -9,4 +9,5 @@ urlpatterns = [
         NewsArticlePredictionFormView.as_view(),
         name="newsarticles-prediction",
     ),
+    # path("predict/detail",NewsArticlePredictionDetailView.as_view(),name="detail")
 ]

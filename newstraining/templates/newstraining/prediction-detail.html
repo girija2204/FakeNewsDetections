@@ -1,0 +1,26 @@
+{% extends "newsextractor/base.html" %}
+{% block content %}
+
+    <article class="media content-section">
+        <div class="media-body">
+            <div class="article-metadata">
+                <h2 class="article-title" >TITLE: {{ title }}</h2>
+            </div>
+            <div class="article-metadata">
+                <a class="mr-2" href="#">AUTHOR: {{ author }}</a>
+                <small class="text-muted">POSTED DATE: {{ date_posted|date:"F d, Y" }}</small>
+
+            </div>
+            <p class="article-content">CONTENT: {{ content }}</p>
+            {% if classPredicted == 1 %}
+                <p class="predicted-1" align="right" style="text-align: center;border-radius: 5px;text-decoration-line: underline;
+                font-size: x-large;font-weight: 700;color: #373638;background-color: #f51d1d;">FAKE STATUS: TRUE</p>
+            {% else %}
+                <p class="predicted-2" align="right" style="text-align: center;border-radius: 5px;text-decoration-line: underline;
+                font-size: x-large;font-weight: 700;color: #373638;background-color: #09bf02;">FAKE STATUS: FALSE</p>
+            {% endif %}
+
+<!--            <p align="right">FAKE STATUS: {{ classPredicted }}</p>-->
+        </div>
+    </article>
+{% endblock content %}

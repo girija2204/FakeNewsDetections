@@ -149,6 +149,7 @@ class AlgorithmAdapter:
             return
         if fndContext.processName == "prediction":
             log.debug(f"Prediction Initiation")
+            # pdb.set_trace()
             recentRunDetail = TrainingUtil.loadRecentRunDetail()
             fndInputs = recentRunDetail.fndConfig.fndModel.fndinput_set.filter(
                 trainingIndicator="Y"
