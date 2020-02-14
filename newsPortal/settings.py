@@ -140,6 +140,6 @@ logging.config.fileConfig(configurationFilePath, disable_existing_loggers=False)
 LOG = logging
 
 CONFIG_PARSER = configparser.ConfigParser()
-LOG.debug(f"ConfigParser created")
-CONFIG_PARSER.read(configurationFilePath)
-LOG.debug(f"ConfigParser reading")
+# LOG.debug(f'ConfigParser created')
+# CONFIG_PARSER.read(configurationFilePath)
+# LOG.debug(f'ConfigParser reading')
