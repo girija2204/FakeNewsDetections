@@ -16,7 +16,7 @@ class FNDExecutor:
     # news_articles = None
     def __init__(self):
         pass
-        # news_articles = pd.read_csv("D:\\ml and dl\\keras\\dataset\\csv files\\dataset_2.csv")
+        # news_articles = pd.read_csv("D:\\ml and dl\\keras\\dataset\\csv files\\dataset_final.csv")
         # for index in range(0,news_articles.shape[0]):
         #     newsArticle = NewsArticle(title=news_articles.iloc[index][2],content=news_articles.iloc[index][1],fake_status=news_articles.iloc[index][0],author=news_articles.iloc[index][3])
         #     newsArticle.save()
