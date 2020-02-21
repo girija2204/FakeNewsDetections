@@ -88,9 +88,17 @@ WSGI_APPLICATION = "newsPortal.wsgi.application"
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+    # },
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'fndDatabase',
+        'USER': 'root',
+        'PASSWORD': 'Girija2204@',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -140,6 +148,6 @@ logging.config.fileConfig(configurationFilePath, disable_existing_loggers=False)
 LOG = logging
 
 CONFIG_PARSER = configparser.ConfigParser()
-# LOG.debug(f'ConfigParser created')
-# CONFIG_PARSER.read(configurationFilePath)
-# LOG.debug(f'ConfigParser reading')
+LOG.debug(f'ConfigParser created')
+CONFIG_PARSER.read(configurationFilePath)
+LOG.debug(f'ConfigParser reading')

@@ -1,9 +1,10 @@
-from keras.layers import Flatten
-from newstraining.algorithm.abstractAlgorithm import AbstractAlgorithm
-from keras.layers import GlobalMaxPooling1D, LSTM, Dropout, Conv1D, MaxPooling1D, BatchNormalization
-from keras.models import Sequential
-from keras.layers.core import Dense
+from math import ceil
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense, LSTM, Dropout, Conv1D, MaxPooling1D, BatchNormalization
+from tensorflow.keras.models import Sequential
 from django.conf import settings
+from newstraining.algorithm.abstractAlgorithm import AbstractAlgorithm
+import pdb
 
 log = settings.LOG
 
@@ -12,7 +13,8 @@ class LSTMAlgo(AbstractAlgorithm):
     def __init__(self, fndContext):
         super().__init__(fndContext)
 
-    def train(self, X_train, Y_train, fndContext, embeddingLayer=None):
+    def createModel(self,embeddingLayer=None):
+        pdb.set_trace()
         model = Sequential()
         model.add(embeddingLayer)
         model.add(Dropout(0.2))
@@ -26,12 +28,49 @@ class LSTMAlgo(AbstractAlgorithm):
         model.add(Dense(128, activation='relu'))
         model.add(Dense(64, activation='relu'))
         model.add(Dense(1, activation="sigmoid"))
-        model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["acc"])
-        print(model.summary())
+        return model
 
-        history = model.fit(
-            X_train, Y_train, batch_size=128, epochs=10, verbose=1, validation_split=0.15
-        )
+    def compileModel(self,model,optimizer,loss,metrics):
+        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        return model
+
+    def batch_generator(self,X, y, batch_size, mode):
+        size = len(X)
+        X_copy = X.copy()
+        y_copy = y.copy()
+        i = 0
+        while True:
+            left, right = i * batch_size, (i + 1) * batch_size
+            right = min(size, right)
+            log.debug("getting padded seqeunces")
+            # pdb.set_trace()
+            X_batch = self.preprocessors[0].getPaddedSequences(X_copy[left:right])
+            y_batch = y_copy[left:right]
+            yield X_batch, y_batch
+            if right >= size:
+                i = 0
+                X_copy = X.copy()
+                y_copy = y.copy()
+            else:
+                i = i + 1
+
+    def train(self, X_train, X_test, Y_train, Y_test, fndContext, embeddingLayer=None):
+        pdb.set_trace()
+        model = self.createModel(embeddingLayer=embeddingLayer)
+        model = self.compileModel(model,"adam","binary_crossentropy",["acc"])
+        log.debug(model.summary())
+        batch_size = 128
+        filepath = "/content/drive/My Drive/Colab Notebooks/weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
+        # checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+        es = EarlyStopping(monitor='val_loss', patience=5, verbose=2)
+        callbacks_list = [es]
+        history = model.fit_generator(generator=self.batch_generator(X_train,Y_train,batch_size,mode="training"),
+                                      steps_per_epoch=ceil(len(X_train) / batch_size),
+                                      epochs=20,
+                                      verbose=1,
+                                      callbacks = callbacks_list,
+                                      validation_data=self.batch_generator(X_test, Y_test, batch_size,mode="testing"),
+                                      validation_steps=ceil(len(X_test) / batch_size))
 
         return model
 

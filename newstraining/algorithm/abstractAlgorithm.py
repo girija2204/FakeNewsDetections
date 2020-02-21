@@ -16,6 +16,7 @@ basedir = settings.BASE_DIR
 
 class AbstractAlgorithm:
     def __init__(self, fndContext):
+        self.preprocessors = []
         self.validate(fndContext)
 
     def validate(self, fndContext):
@@ -47,7 +48,7 @@ class AbstractAlgorithm:
             "tokenizerFileExtension", fndContext.tokenizerFileExtension
         )
 
-    def train(self, X_train, Y_train, fndContext, embeddingLayer=None):
+    def train(self, X_train, X_test, Y_train, Y_test, fndContext, embeddingLayer=None):
         # X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
         #     trainingInput[0], trainingInput[1], fndContext.trainTestSplitRatio
         # )

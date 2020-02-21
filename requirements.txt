@@ -1,7 +1,8 @@
-matplotlib
 keras
 nltk
 scikit-learn
 django
 numpy
 pandas
+tensorflow
+mysqlclient

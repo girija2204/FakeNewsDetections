@@ -12,7 +12,7 @@ class ConvolutionalNN(AbstractAlgorithm):
     def __init__(self, fndContext):
         super().__init__(fndContext)
 
-    def train(self, X_train, Y_train, fndContext, embeddingLayer=None):
+    def train(self, X_train, X_test, Y_train, Y_test, fndContext, embeddingLayer=None):
         model = Sequential()
         model.add(embeddingLayer)
         model.add(Conv1D(128, 5, activation="relu"))

@@ -1,18 +1,22 @@
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.layers import Embedding
+import numpy as np
+import pandas as pd
 import re
+import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from newstraining.preprocessor.preprocessor import Preprocessor
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-import numpy as np
 from django.conf import settings
 from newstraining.trainingUtil import TrainingUtil
-import pandas as pd
-from keras.layers.embeddings import Embedding
+from newstraining.preprocessor.preprocessor import Preprocessor
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 import pdb
-
 
 log = settings.LOG
 
@@ -39,37 +43,41 @@ class ContentPreprocessor(Preprocessor):
 
     def removeSymbols(self, contentData, columnName):
         log.debug(f"Removing unnecessary symbols")
+        contentDataNew = pd.Series(data=None, index=contentData.index)
         for index, content in enumerate(contentData):
             content = re.sub("[^a-zA-Z0-9]", " ", content)
             content = re.sub(r"\s+[a-zA-Z]\s+", " ", content)
             content = re.sub(r"\s+", " ", content)
-            contentData.iloc[index] = content
-        return contentData
+            contentDataNew.iloc[index] = content
+        return contentDataNew
 
     def stemText(self, contentData):
         log.debug(f"Stemming text")
+        contentDataNew = pd.Series(data=None, index=contentData.index)
         lemmatizer = WordNetLemmatizer()
         for index, content in enumerate(contentData):
             stemmedContent = [lemmatizer.lemmatize(word.lower()) for word in content]
-            contentData.iloc[index] = " ".join(word for word in stemmedContent)
-        return contentData
+            contentDataNew.iloc[index] = " ".join(word for word in stemmedContent)
+        return contentDataNew
 
     def removeStopWords(self, contentData):
         log.debug(f"Removing stop words")
+        contentDataNew = pd.Series(data=None, index=contentData.index)
         stop_words = set(stopwords.words("english"))
         for index, content in enumerate(contentData):
             filteredContent = []
             for word in content:
                 if not word in stop_words:
                     filteredContent.append(word)
-            contentData.iloc[index] = filteredContent
-        return contentData
+            contentDataNew.iloc[index] = filteredContent
+        return contentDataNew
 
     def tokenizeSentence(self, contentData):
         log.debug(f"Tokenizing sentences")
+        contentDataNew = pd.Series(data=None, index=contentData.index)
         for index, content in enumerate(contentData):
-            contentData.iloc[index] = word_tokenize(content)
-        return contentData
+            contentDataNew.iloc[index] = word_tokenize(content)
+        return contentDataNew
 
     def createTokenizer(self, X_train):
         tokenizer = Tokenizer(num_words=5000)
@@ -126,20 +134,16 @@ class ContentPreprocessor(Preprocessor):
         return paddedSequenceData
 
     def getEmbeddingMatrix(self, data):
-        # pdb.set_trace()
-        # tokenizer = self.tokenizer
-        # if tokenizer is None:
         tokenizer = self.createTokenizer(data)
 
-        embedding_dictionary = self.createWordEmbeddingDictionary()
-        embedding_matrix = self.createEmbeddingMatrix(
-            embeddings_dictionary=embedding_dictionary, tokenizer=tokenizer
-        )
-        return embedding_matrix
+        # embedding_dictionary = self.createWordEmbeddingDictionary()
+        # embedding_matrix = self.createEmbeddingMatrix(
+        #     embeddings_dictionary=embedding_dictionary, tokenizer=tokenizer
+        # )
+        # return embedding_matrix
 
     def preprocess(self, data, fndContext):
         log.debug(f"preprocessing start with contentPreprocessor")
-        # pdb.set_trace()
         contentData = self.removeSymbols(data["content"], "content")
         contentData = self.tokenizeSentence(contentData)
         contentData = self.removeStopWords(contentData)
@@ -153,11 +157,17 @@ class ContentPreprocessor(Preprocessor):
             filteredContentData.columns = ["content"]
         return filteredContentData
 
-    def getEmbeddingLayer(self, embeddingMatrix):
+    def getEmbeddingLayer(self):
+        # embedding_layer = Embedding(
+        #     self.getVocabularySize(),
+        #     100,
+        #     weights=[embeddingMatrix],
+        #     input_length=int(TrainingUtil.getMaxLength()),
+        #     trainable=False,
+        # )
         embedding_layer = Embedding(
             self.getVocabularySize(),
             100,
-            weights=[embeddingMatrix],
             input_length=int(TrainingUtil.getMaxLength()),
             trainable=False,
         )

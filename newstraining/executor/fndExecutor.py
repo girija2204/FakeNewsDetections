@@ -1,9 +1,7 @@
 from newstraining.datasource.inputDataGenerator import InputDataGenerator
 from newstraining.algorithm.algorithmAdapter import AlgorithmAdapter
 from django.conf import settings
-import pandas as pd
 import numpy as np
-from keras.models import Sequential
 from newsextractor.models import NewsArticle
 import datetime
 from newstraining.models.fndRunDetail import FNDRunDetail
@@ -13,13 +11,12 @@ log = settings.LOG
 
 
 class FNDExecutor:
-    # news_articles = None
     def __init__(self):
-        pass
-        # news_articles = pd.read_csv("D:\\ml and dl\\keras\\dataset\\csv files\\dataset_final.csv")
+        # news_articles = pd.read_csv("D:\\ml and dl\\keras\\dataset\\csv files\\training_data002.csv")
         # for index in range(0,news_articles.shape[0]):
         #     newsArticle = NewsArticle(title=news_articles.iloc[index][2],content=news_articles.iloc[index][1],fake_status=news_articles.iloc[index][0],author=news_articles.iloc[index][3])
         #     newsArticle.save()
+        pass
 
     def execute(self, fndContext):
         runStartTime = datetime.datetime.now()

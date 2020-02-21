@@ -7,9 +7,11 @@ import pdb
 import os
 import datetime
 import pickle
+import pandas as pd
 
 configParser = settings.CONFIG_PARSER
 basedir = settings.BASE_DIR
+log = settings.LOG
 
 
 class TrainingUtil:
@@ -58,13 +60,8 @@ class TrainingUtil:
 
     @staticmethod
     def loadRecentRunDetail():
-        currentDate = datetime.datetime.now().date()
-        nextDate = currentDate + datetime.timedelta(days=1)
-        return (
-            FNDRunDetail.objects.filter(runStartTime__range=[currentDate, nextDate])
-            .order_by("-runStartTime")
-            .first()
-        )
+        return FNDRunDetail.objects.order_by("-runStartTime").first()
+
 
     @staticmethod
     def loadTokenizer():

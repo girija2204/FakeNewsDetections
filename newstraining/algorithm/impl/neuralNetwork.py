@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from keras.layers import Flatten
 from keras.layers.core import Dense
 from keras.layers.embeddings import Embedding
@@ -17,7 +17,7 @@ class NeuralNetwork(AbstractAlgorithm):
     def __init__(self, fndContext):
         super().__init__(fndContext)
 
-    def train(self, X_train, Y_train, fndContext, embeddingLayer=None):
+    def train(self, X_train, X_test, Y_train, Y_test, fndContext, embeddingLayer=None):
         model = Sequential()
         model.add(embeddingLayer)
         model.add(Flatten())
