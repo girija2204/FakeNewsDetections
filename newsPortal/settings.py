@@ -32,7 +32,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "kaqzben&85g5smgrxvl2e)!0eyu9gcg_v$g5+20dr-qphml@42"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -94,12 +94,20 @@ DATABASES = {
     # },
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fndDatabase',
-        'USER': 'root',
-        'PASSWORD': 'Girija2204@',
-        'HOST': '127.0.0.1',
+        'NAME': 'mysql4321',
+        'USER': 'mysql4321',
+        'PASSWORD': 'mysql4321',
+        'HOST': 'database',
         'PORT': '3306',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'fndDatabase',
+    #     'USER': 'root',
+    #     'PASSWORD': 'Girija2204@',
+    #     'HOST': '127.0.0.1',
+    #     'PORT': '3306',
+    # }
 }
 
 
