@@ -34,7 +34,7 @@ class TrainingUtil:
     def getAlgoName():
         algo = TrainingUtil.getConfigAttribute(
             TrainingEnums.TRAINING_CONFIGURATIONS.value,
-            TrainingEnums.TRAINING_NAME.value,
+            TrainingEnums.TRAINING_ALGO_NAME.value,
         )
         return algo
 

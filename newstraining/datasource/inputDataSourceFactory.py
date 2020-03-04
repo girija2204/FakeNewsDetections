@@ -3,6 +3,8 @@ from newstraining.datasource.impl.authorDS import AuthorDS
 from newstraining.datasource.impl.titleDS import TitleDS
 from django.conf import settings
 
+from newstraining.models.fndInput import FNDInput
+
 log = settings.LOG
 
 
@@ -25,8 +27,9 @@ class InputDataSourceFactory:
     def __getattr__(self, item):
         return getattr(self.instance, item)
 
-    def getInputDataSource(self, fndInput):
+    def getInputDataSource(self, input):
         dataSource = None
+        fndInput = FNDInput.objects.get(pk=input)
         log.debug(
             f"fndInput: {fndInput.variableName.lower()} and trainingIndicator: {fndInput.trainingIndicator}"
         )

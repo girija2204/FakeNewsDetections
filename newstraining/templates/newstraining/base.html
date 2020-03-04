@@ -1,11 +1,8 @@
 {% load static %}
 <html>
     <head>
-        <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="{% static 'newsextractor/main.css' %}">
         {% if title %}
@@ -28,11 +25,9 @@
                         <a class="nav-item nav-link" href="{% url 'portal-home' %}">Home</a>
                     {% endif %}
                 </div>
-                <!-- Navbar Right Side -->
                 <div class="navbar-nav">
                     {% if user.is_authenticated %}
                         <a class="nav-item nav-link" href="{% url 'portal-logout' %}">Logout</a>
-                        <a class="nav-item nav-link" href="{% url 'newsarticles-create' %}">Create News</a>
                     {% else %}
                         <a class="nav-item nav-link" href="{% url 'portal-login' %}">Login</a>
                     {% endif %}
@@ -43,22 +38,8 @@
         </header>
         <main role="main" class="container">
           <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 {% block content %}{% endblock %}
-            </div>
-            <div class="col-md-4">
-                {% if user.is_authenticated %}
-                <div class="content-section">
-<!--                    <h3>Our Sidebar</h3>-->
-                    <p class='text-muted'>Please have a look on our recent news articles.
-                    <ul class="list-group">
-                        <li class="list-group-item list-group-item-light">Recently Added Articles</li>
-                        <li class="list-group-item list-group-item-light">Fake Articles</li>
-                        <li class="list-group-item list-group-item-light">Real Articles</li>
-                    </ul>
-                    </p>
-              </div>
-                {% endif %}
             </div>
           </div>
         </main>

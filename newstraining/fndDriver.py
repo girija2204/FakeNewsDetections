@@ -13,10 +13,17 @@ class FNDDriver:
     def __init__(self):
         pass
 
-    def run(self):
+    def saveConfiguration(self,jobType=None,algorithmType=None,inputTypes=None,outputType=None):
+        dao = FNDetectorDao(trainingJobType=jobType, trainingAlgoName=algorithmType, inputTypes=inputTypes,
+                            outputType=outputType)
+        configuration = dao.saveConfiguration()
+        return configuration
+
+    def run(self,jobType=None,algorithmType=None,inputTypes=None,outputType=None):
         log.debug(f"Inside ntDriver run")
-        dao = FNDetectorDao()
-        configuration = dao.getConfiguration()
+        dao = FNDetectorDao(trainingJobType=jobType,trainingAlgoName=algorithmType,inputTypes=inputTypes,outputType=outputType)
+        # configuration = dao.getConfiguration()
+        configuration = dao.saveConfiguration()
         if not configuration:
             log.debug(f"Training incomplete due to invalid configuration")
             return
@@ -38,12 +45,11 @@ class FNDDriver:
         )
         fndContext = FNDContext(processName="training")
         fndContext.fndConfig = configuration
-        # pdb.set_trace()
         if (
-            startDate is not None
-            and startDate is not ""
-            and endDate is not None
-            and endDate is not ""
+                startDate is not None
+                and startDate is not ""
+                and endDate is not None
+                and endDate is not ""
         ):
             fndContext.trainStartDate = startDate
             fndContext.trainEndDate = endDate

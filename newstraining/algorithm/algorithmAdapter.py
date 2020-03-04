@@ -1,4 +1,6 @@
 from tensorflow.keras.models import load_model
+
+from newstraining.models.fndInput import FNDInput
 from newstraining.preprocessor.contentPreprocessor import ContentPreprocessor
 from django.conf import settings
 import os
@@ -40,75 +42,71 @@ class AlgorithmAdapter:
             log.debug(f"Initiation failed")
             return
         log.debug(f"Training Initiation")
-        fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
-            trainingIndicator="Y"
-        ).all()
-        preprocessor = None
-        for fndInput in fndInputs:
-            if fndInput.variableName == "content":
+        fndInputs = []
+        inputs = fndContext.fndConfig.fndInputs
+        for input in inputs:
+            fndInput = FNDInput.objects.get(pk=input)
+            preprocessor = None
+            if fndInput.variableName.lower() == "content":
                 preprocessor = ContentPreprocessor()
-        preprocessedTrainingInput = preprocessor.preprocess(trainingInput, fndContext)
-        fndAlgoName = self.getFNDAlgoName()
-        if not fndAlgoName:
-            log.debug("training algo not configured. Cannot train further")
-            return
-        pdb.set_trace()
-        klass = globals()[fndAlgoName]
-        fndContext.trainTestSplitRatio = float(
-            self.getTrainingProperties(
-                TrainingEnums.TRAIN_TEST_SPLIT_RATIO.value, fndContext
+            preprocessedTrainingInput = preprocessor.preprocess(trainingInput, fndContext)
+            log.debug(f"Preprocessing done")
+            fndAlgoName = self.getFNDAlgoName()
+            if not fndAlgoName:
+                log.debug("training algo not configured. Cannot train further")
+                return
+            # pdb.set_trace()
+            klass = globals()[fndAlgoName]
+            fndContext.trainTestSplitRatio = float(
+                self.getTrainingProperties(
+                    TrainingEnums.TRAIN_TEST_SPLIT_RATIO.value, fndContext
+                )
             )
-        )
 
-        log.debug(
-            f"Splitting the dataset: {fndContext.trainTestSplitRatio} for test and {1 - float(fndContext.trainTestSplitRatio)} for train"
-        )
-        X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
-            preprocessedTrainingInput["content"],
-            preprocessedTrainingInput["label"],
-            float(fndContext.trainTestSplitRatio),
-        )
-        fndInputs = fndContext.fndConfig.fndModel.fndinput_set.filter(
-            trainingIndicator="Y"
-        ).all()
-        preprocessor = None
-        for fndInput in fndInputs:
-            if fndInput.variableName == "content":
-                preprocessor = ContentPreprocessor()
-        embedding_matrix = preprocessor.getEmbeddingMatrix(data=X_train)
-        # paddedX_train = preprocessor.getPaddedSequences(X_train)
-        # paddedX_test = preprocessor.getPaddedSequences(X_test)
+            log.debug(
+                f"Splitting the dataset: {fndContext.trainTestSplitRatio} for test and {1 - float(fndContext.trainTestSplitRatio)} for train"
+            )
+            X_train, X_test, Y_train, Y_test = TrainingUtil.splitTrainTest(
+                preprocessedTrainingInput["content"],
+                preprocessedTrainingInput["label"],
+                float(fndContext.trainTestSplitRatio),
+            )
+            embedding_matrix = preprocessor.getEmbeddingMatrix(data=X_train)
+            # paddedX_train = preprocessor.getPaddedSequences(X_train)
+            # paddedX_test = preprocessor.getPaddedSequences(X_test)
 
-        embedding_layer = preprocessor.getEmbeddingLayer()
+            embedding_layer = preprocessor.getEmbeddingLayer()
 
-        fndContext = self.populateFndContext(fndContext=fndContext)
+            fndContext = self.populateFndContext(fndContext=fndContext)
 
-        algo = klass(fndContext)
-        log.debug("Adding content preprocessor to algo")
-        pdb.set_trace()
-        algo.preprocessors.append(preprocessor)
-        # pdb.set_trace()
-        model = algo.train(X_train, X_test, Y_train, Y_test,
-            fndContext=fndContext,
-            embeddingLayer=embedding_layer,
-        )
+            algo = klass(fndContext)
+            log.debug("Adding content preprocessor to algo")
+            # pdb.set_trace()
+            algo.preprocessors.append(preprocessor)
+            # pdb.set_trace()
+            model = algo.train(X_train, X_test, Y_train, Y_test,
+                fndContext=fndContext,
+                embeddingLayer=embedding_layer,
+            )
 
-        log.debug("Saving the tokenizer")
-        algo.saveTokenizer(tokenizer=preprocessor.tokenizer, fndContext=fndContext)
-        log.debug("Saving the model")
-        algo.saveModel(model=model, fndContext=fndContext)
+            log.debug("Saving the tokenizer")
+            algo.saveTokenizer(tokenizer=preprocessor.tokenizer, fndContext=fndContext)
+            log.debug("Saving the model")
+            algo.saveModel(model=model, fndContext=fndContext)
 
-        # log.debug("Evaluating the model on test data set")
-        # algo.evaluateModel(model, X_test, Y_test, fndContext)
-        # log.debug("Training over")
+            # log.debug("Evaluating the model on test data set")
+            # algo.evaluateModel(model, X_test, Y_test, fndContext)
+            # log.debug("Training over")
 
     def getFNDAlgoName(self):
         return TrainingUtil.getAlgoName()
 
     def getTrainingProperties(self, propertyName, fndContext):
+        log.debug(propertyName)
         fndModelAttribute = fndContext.fndConfig.fndModel.fndmodelattribute_set.filter(
             name=propertyName
         ).first()
+        log.debug(fndModelAttribute)
         return fndModelAttribute.value
 
     def getModelFileExtension(self, fndContext):
@@ -152,7 +150,7 @@ class AlgorithmAdapter:
             return
         if fndContext.processName == "prediction":
             log.debug(f"Prediction Initiation")
-            pdb.set_trace()
+            # pdb.set_trace()
             try:
                 recentRunDetail = TrainingUtil.loadRecentRunDetail()
                 if not recentRunDetail:

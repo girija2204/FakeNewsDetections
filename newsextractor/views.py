@@ -21,7 +21,7 @@ class NewsArticlesListView(ListView):
     model = NewsArticle
     template_name = "newsextractor/home.html"
     context_object_name = "news_articles"
-    print(f'hello S: {NewsArticle.objects.all()}')
+    # print(f'hello S: {NewsArticle.objects.all()}')
     ordering = ["-date_posted"]
 
 

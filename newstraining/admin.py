@@ -6,6 +6,7 @@ from newstraining.models import (
     fndModel,
     fndOutput,
     fndRunDetail,
+    jobTypes
 )
 
 fndModels = [
@@ -15,5 +16,6 @@ fndModels = [
     fndModelAttribute.FNDModelAttribute,
     fndInput.FNDInput,
     fndRunDetail.FNDRunDetail,
+    jobTypes.JobTypes,
 ]
 admin.site.register(fndModels)

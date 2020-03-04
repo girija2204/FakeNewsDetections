@@ -5,6 +5,7 @@ import numpy as np
 from newsextractor.models import NewsArticle
 import datetime
 from newstraining.models.fndRunDetail import FNDRunDetail
+import pandas as pd
 import pdb
 
 log = settings.LOG

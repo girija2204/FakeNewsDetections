@@ -4,8 +4,10 @@ from enum import Enum
 class TrainingEnums(Enum):
     # configuration file
     TRAINING_CONFIGURATIONS = "trainingConfigurations"
-    TRAINING_NAME = "trainingAlgoName"
-    TRAINING_ALGO = "trainingType"
+    TRAINING_ALGO_NAME = "trainingAlgoName"
+    TRAINING_JOB_TYPE = "trainingJobType"
+    INPUT_TYPES = "inputTypes"
+    OUTPUT_TYPE = "outputType"
     TRAINING_CONTEXT = "trainingContext"
     TRAINING_STARTDATE = "trainingStartDate"
     TRAINING_ENDDATE = "trainingEndDate"
@@ -36,3 +38,7 @@ class TrainingEnums(Enum):
 
     # date time
     TIMESTAMP_FORMAT = "%Y%m%d-%H%M%S"
+
+    # training types
+    DAILY_TRAINING = "DAILY_TRAINING"
+    MANUAL_TRAINING = "MANUAL_TRAINING"

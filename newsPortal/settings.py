@@ -32,9 +32,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "kaqzben&85g5smgrxvl2e)!0eyu9gcg_v$g5+20dr-qphml@42"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -89,18 +89,18 @@ WSGI_APPLICATION = "newsPortal.wsgi.application"
 
 DATABASES = {
     # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+    #     # "ENGINE": "django.db.backends.sqlite3",
+    #     # "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     # },
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mysql4321',
-        'USER': 'mysql4321',
-        'PASSWORD': 'mysql4321',
-        'HOST': 'database',
-        'PORT': '3306',
-    }
-    # 'default': {
+    "default": {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'mysql4321',
+            'USER': 'mysql4321',
+            'PASSWORD': 'mysql4321',
+            'HOST': 'database',
+            'PORT': 3306,
+    },
+    # "default": {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'fndDatabase',
     #     'USER': 'root',

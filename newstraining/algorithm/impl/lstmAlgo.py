@@ -14,7 +14,7 @@ class LSTMAlgo(AbstractAlgorithm):
         super().__init__(fndContext)
 
     def createModel(self,embeddingLayer=None):
-        pdb.set_trace()
+        # pdb.set_trace()
         model = Sequential()
         model.add(embeddingLayer)
         model.add(Dropout(0.2))
@@ -55,7 +55,7 @@ class LSTMAlgo(AbstractAlgorithm):
                 i = i + 1
 
     def train(self, X_train, X_test, Y_train, Y_test, fndContext, embeddingLayer=None):
-        pdb.set_trace()
+        # pdb.set_trace()
         model = self.createModel(embeddingLayer=embeddingLayer)
         model = self.compileModel(model,"adam","binary_crossentropy",["acc"])
         log.debug(model.summary())
@@ -66,7 +66,7 @@ class LSTMAlgo(AbstractAlgorithm):
         callbacks_list = [es]
         history = model.fit_generator(generator=self.batch_generator(X_train,Y_train,batch_size,mode="training"),
                                       steps_per_epoch=ceil(len(X_train) / batch_size),
-                                      epochs=20,
+                                      epochs=2,
                                       verbose=1,
                                       callbacks = callbacks_list,
                                       validation_data=self.batch_generator(X_test, Y_test, batch_size,mode="testing"),

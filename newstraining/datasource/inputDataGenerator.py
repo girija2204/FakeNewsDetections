@@ -1,5 +1,6 @@
 from newstraining.datasource.inputDataSourceFactory import InputDataSourceFactory
 from django.conf import settings
+import pdb
 
 log = settings.LOG
 
@@ -35,8 +36,9 @@ class InputDataGenerator:
             log.debug(f"trainStartDate: {trainStartDate}")
             log.debug(f"trainEndDate: {trainEndDate}")
             log.debug(f"fndConfig: {fndConfig}")
-            fndInputs = fndConfig.fndModel.fndinput_set.all()
-            fndOutput = fndConfig.fndModel.fndoutput_set.first()
+            # pdb.set_trace()
+            fndInputs = fndConfig.fndInputs
+            fndOutput = fndConfig.fndOutput
             # will be a loop as multiple inputs will participate in training
             # for fndInput in fndInputs:
             #     inputDataSourceFactory = InputDataSourceFactory()
@@ -48,6 +50,8 @@ class InputDataGenerator:
             #             startDate=trainStartDate,
             #             endDate=trainEndDate,
             #         )
+            log.debug(f'fndInputs: {fndInputs}')
+            log.debug(f'fndOutputs: {fndOutput}')
             dataset = None
             for fndInput in fndInputs:
                 inputDataSourceFactory = InputDataSourceFactory()
@@ -55,10 +59,10 @@ class InputDataGenerator:
                 if dataSource is not None:
                     dataset = dataSource.getDataset(
                         fndContext=context,
-                        fndInput=fndInput,
-                        fndOutput=fndOutput,
+                        input=fndInput,
+                        output=fndOutput,
                         startDate=trainStartDate,
                         endDate=trainEndDate,
                     )
-                # log.debug(f"dataset: {dataset}")
+                log.debug(f"dataset: {dataset}")
             return dataset

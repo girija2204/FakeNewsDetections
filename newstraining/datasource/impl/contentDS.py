@@ -5,6 +5,9 @@ from newstraining.datasource.abstractDS import AbstractDS
 import pandas as pd
 import pdb
 
+from newstraining.models.fndOutput import FNDOutput
+from newstraining.models.fndInput import FNDInput
+
 log = settings.LOG
 
 
@@ -33,8 +36,10 @@ class ContentDS(AbstractDS):
             )
         return newsArticles
 
-    def getDataset(self, fndContext, fndInput, fndOutput, startDate=None, endDate=None):
+    def getDataset(self, fndContext, input, output, startDate=None, endDate=None):
         log.debug(f"Inside contentDS")
+        fndInput = FNDInput.objects.get(pk=input)
+        fndOutput = FNDOutput.objects.get(pk=output)
         news_articles = self.getDataFromDB(startDate, endDate)
         dataset = pd.DataFrame.from_records(news_articles.values())
         # pdb.set_trace()
