@@ -5,6 +5,8 @@ from django.conf import settings
 
 from newsextractor.models import NewsArticle
 from newstraining.fndDriver import FNDDriver
+from newstraining.models.fndInput import FNDInput
+from newstraining.models.fndOutput import FNDOutput
 from newstraining.models.fndModel import FNDModel
 from newstraining.models.jobTypes import JobTypes
 from .forms import NewsPredictionForm, NewsTrainingForm
@@ -45,29 +47,55 @@ def threadRun(selectedJobType, selectedAlgorithmType, selectedInputTypes, select
 class NewsArticleTrainingFormView(LoginRequiredMixin, FormView):
     form_class = NewsTrainingForm
     template_name = "newstraining/training-form.html"
+    # template_name = "newstraining/training-detail.html"
     success_url = "newstraining/training-detail.html"
 
     def post(self, request, *args, **kwargs):
-        selectedJobCode = request.POST.get('job_codes')
+        log.debug("Inside view for training")
         selectedInputTypes = request.POST.getlist('input_types')
         selectedOutputType = request.POST.get('output_types')
         selectedAlgorithmType = request.POST.get('algorithm_types')
         selectedJobType = request.POST.get('job_types')
-        log.debug("Inside view for training")
-        log.debug(f'selected input types:{selectedOutputType}')
         fndDriver = FNDDriver()
-        configuration = fndDriver.saveConfiguration(selectedJobType,selectedAlgorithmType,selectedInputTypes,selectedOutputType)
-        if configuration.fndType.lower() == TrainingEnums.DAILY_TRAINING.value.lower():
+        configuration = fndDriver.saveConfiguration(selectedJobType, selectedAlgorithmType, selectedInputTypes,
+                                                    selectedOutputType)
+        selectedMin = None
+        selectedHour = None
+        selectedDailyHourField = None
+        selectedDailyMinField = None
+        if selectedJobType == TrainingEnums.DAILY_TRAINING.value:
+            log.debug(f'Selected Job Type: {selectedJobType}')
+            if request.POST.get('minutes_field') != '--':
+                selectedMin = request.POST.get('minutes_field')
+                log.debug(f'Selected Minutes: {selectedMin}')
+
+            elif request.POST.get('hour_field') != '--':
+                selectedHour = request.POST.get('hour_field')
+                log.debug(f'Selected Hours: {selectedHour}')
+
+            elif request.POST.get('daily_hour_start_field') != '--':
+                selectedDailyHourField = request.POST.get('daily_hour_start_field')
+                selectedDailyMinField = request.POST.get('daily_minute_start_field')
+                log.debug(f'selected Daily Hour field: {selectedDailyHourField}')
+                log.debug(f'selected Daily Minute field: {selectedDailyMinField}')
+
             dnt = DailyTrainingJobs()
             t = threading.Thread(target=dnt.run,
-                                 args=[selectedJobType, selectedAlgorithmType, selectedInputTypes, selectedOutputType])
+                                 args=[selectedJobType, selectedAlgorithmType, selectedInputTypes,
+                                       selectedOutputType, selectedMin, selectedHour, selectedDailyHourField, selectedDailyMinField])
             t.start()
+
         elif configuration.fndType.lower() == TrainingEnums.MANUAL_TRAINING.value.lower():
             mnt = ManualTrainingJobs()
             t = threading.Thread(target=mnt.run,
                                  args=[selectedJobType, selectedAlgorithmType, selectedInputTypes, selectedOutputType])
             t.start()
-        context = {"news_articles": "hello modekl", "title": "Portal - Homepage"}
+        inputs = []
+        output = None
+        for input in configuration.fndInputs:
+            inputs.append(FNDInput.objects.filter(id=input).values_list('variableName', flat=True).first())
+        output = FNDOutput.objects.filter(id=configuration.fndOutput).values_list('variableName', flat=True).first()
+        context = {"inputs": inputs, "output": output, "algorithm": configuration.fndModel.name}
         return render(request, self.success_url, context=context)
 
 

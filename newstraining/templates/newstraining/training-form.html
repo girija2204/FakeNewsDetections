@@ -1,48 +1,112 @@
 {% extends "newstraining/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-    <div class="content-section">
-        <form method="post" id="personForm" data-cities-url="{% url 'ajax_load_job_codes' %}" novalidate>
+        <h2 id="definejob">Define a Job</h2>
+        <form method="post">
             {% csrf_token %}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Configure Fake News Training</legend>
-                {{ form|crispy }}
-            </fieldset>
-            <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Detect</button>
+<!--            <fieldset class="form-group">-->
+<!--              <legend class="border-bottom mb-4">Configure Fake News Training</legend>-->
+<!--                {{ form|crispy }}-->
+<!--            </fieldset>-->
+            <div id="accordion">
+                <div class="row" style="margin-top:20px;">
+                    <a class="btn btn-primary" style="width: 100%; text-align:center;" data-toggle="collapse" href="#collapseJobTypeCard" role="button" aria-expanded="false" aria-controls="collapseJobTypeCard">
+                        Job Type
+                    </a>
+                    <div class="card collapse" id="collapseJobTypeCard" data-parent="#accordion">
+                        <div class="card-body" style="display: inline-flex;">
+                            <div style="width: 60%;border-right: 1px solid #e6e6e6;display: flow-root; padding-right: 50px; text-align: justify;">
+                                <h5 class="card-title">Select Job types</h5>
+                                <p class="card-text">Job Types: 1. Manual Training, 2. Daily Training. <br>Select Manual Training if only if training job is intended to run for one time, it triggers the job immediately.
+                            Select Daily Training, when training job is intended to run at a specific time every day, or in a periodic basis. It generates a cron expression, the job triggers based on the cron expression.</p>
+                            </div>
+                            <div class="jobtypes">
+                                {{ form.job_types }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="tempId" style="display:none; margin-top:20px;">
+                    <a class="btn btn-primary" style="width: 100%; text-align:center;" data-toggle="collapse" href="#collapseTriggerTypeCard" role="button" aria-expanded="false" aria-controls="collapseTriggerTypeCard">
+                        Trigger Type
+                    </a>
+                    <div class="card collapse" id="collapseTriggerTypeCard" data-parent="#accordion">
+                        <div class="card-body" style="display:inline-flex;">
+                            <div style="width: 60%;border-right: 1px solid #e6e6e6;display: flow-root; padding-right: 50px; text-align: justify;">
+                                <h5 class="card-title">Define Trigger</h5>
+                                <p class="card-text">Select how you want to run the job.  <br>1. Minutes, 2. Hourly, 3. Daily <br>Select Minutes to run the job in every x minutes. Select Hourly run the job in every x hours. Select Daily to run the job daily at x hours : y minutes.</p>
+                            </div>
+                            <div class="triggertypes">
+                                <nav>
+                                    <div class="nav nav-pills mb-3" id="nav-tab" role="tablist">
+                                        <a class="nav-item nav-link active" id="nav-minutes-tab" data-toggle="pill" href="#nav-minutes" role="tab" aria-controls="pills-minutes" aria-selected="true">Minutes</a>
+                                        <a class="nav-item nav-link" id="nav-hourly-tab" data-toggle="pill" href="#nav-hourly" role="tab" aria-controls="pills-hourly" aria-selected="false">Hourly</a>
+                                        <a class="nav-item nav-link" id="nav-daily-tab" data-toggle="pill" href="#nav-daily" role="tab" aria-controls="pills-daily" aria-selected="false">Daily</a>
+                                    </div>
+                                </nav>
+                                <div class="tab-content" id="pills-tabContent" style="display: flex; justify-content: space-evenly;">
+                                    <div class="tab-pane fade show active" id="nav-minutes" role="tabpanel" aria-labelledby="pills-minutes-tab"><p class="cron-text">Every </p>{{ form.minutes_field }} <p class="cron-text">Minute(s)</p></div>
+                                    <div class="tab-pane fade" id="nav-hourly" role="tabpanel" aria-labelledby="pills-hourly-tab"><p class="cron-text">Every </p>{{ form.hour_field }} <p class="cron-text">Hour(s) </p></div>
+                                    <div class="tab-pane fade" id="nav-daily" role="tabpanel" aria-labelledby="pills-daily-tab">
+                                        <p class="cron-text">Every Day starts at : </p>{{ form.daily_hour_start_field }} <p class="cron-text">hours : </p>{{ form.daily_minute_start_field }} <p class="cron-text">minutes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:20px;">
+                    <a class="btn btn-primary" style="width: 100%; text-align:center;" data-toggle="collapse" href="#collapseInputTypeCard" role="button" aria-expanded="false" aria-controls="collapseInputTypeCard">
+                        Input types
+                    </a>
+                    <div class="card collapse" id="collapseInputTypeCard" data-parent="#accordion">
+                        <div class="card-body" style="display: inline-flex;">
+                            <div style="width: 60%;border-right: 1px solid #e6e6e6;display: flow-root; padding-right: 50px; text-align: justify;">
+                                <h5 class="card-title">Select Input types (only content supported now)</h5>
+                                <p class="card-text">Train with the following input types. Content - the actual description of the news articles, Title - the title of the news article, Date Posted - the date on which the article has been posted</p>
+                            </div>
+                            <div class="itypes">
+                                {{ form.input_types }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:20px;">
+                    <a class="btn btn-primary" style="width: 100%; text-align:center;" data-toggle="collapse" href="#collapseOutputTypeCard" role="button" aria-expanded="false" aria-controls="collapseOutputTypeCard">
+                        Output types
+                    </a>
+                    <div class="card collapse" id="collapseOutputTypeCard" data-parent="#accordion">
+                        <div class="card-body" style="display: inline-flex;">
+                            <div style="width: 60%;border-right: 1px solid #e6e6e6;display: flow-root; padding-right: 50px; text-align: justify;">
+                                <h5 class="card-title">Select Output types</h5>
+                                <p class="card-text">As of now, Fake news detection only provides functionality for detecting a news as fake or real. So to train the news articles select, fake_status as the output type.</p>
+                            </div>
+                            <div class="itypes">
+                                {{ form.output_types }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:20px;">
+                    <a class="btn btn-primary" style="width: 100%; text-align:center;" data-toggle="collapse" href="#collapseAlgorithmTypeCard" role="button" aria-expanded="false" aria-controls="collapseAlgorithmTypeCard">
+                        Algorithm types
+                    </a>
+                    <div class="card collapse" id="collapseAlgorithmTypeCard" data-parent="#accordion" style="width: 100%">
+                        <div class="card-body" style="display: inline-flex;">
+                            <div style="width: 60%;border-right: 1px solid #e6e6e6;display: flow-root; padding-right: 50px; text-align: justify;">
+                                <h5 class="card-title">Select Algorithm types</h5>
+                                <p class="card-text">Currently Neural Network, Convolutional Neural Network and LSTM are supported in the algorithms. <br><b>Note:</b> Select LSTM to get better performance while training.</p>
+                            </div>
+                            <div class="algotypes">
+                                {{ form.algorithm_types }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" style="display: flex; justify-content: center; margin-top: 20px;">
+                    <a class="nav-item nav-link btn-light" href="{% url 'portal-home' %}" style="margin: 10px">Cancel</a>
+                   <button class="btn btn-dark" type="submit" style="margin: 10px">Add</button>
+                </div>
             </div>
         </form>
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact</a>
-          </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-          <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">...</div>
-          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
-          <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
-        </div>
-
-          <script>
-            $("#id_job_types").change(function () {
-              var url = $("#trainingForm").attr("job-codes-url");
-              var jobType = $(this).val();
-              $.ajax({
-                url: url,
-                data: {
-                  'job_types': jobType
-                },
-                success: function (data) {
-                  $("#id_job_codes").html(data);
-                }
-              });
-            });
-          </script>
-    </div>
 {% endblock content %}

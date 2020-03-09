@@ -1,10 +1,18 @@
 {% extends "newstraining/base.html" %}
 {% block content %}
-    <article class="media content-section">
-        <div class="media-body">
-            <div class="article-metadata">
-                <h2 class="article-title btn-success" >Your training has been started.</h2>
-            </div>
+    <div class="card text-center">
+        <div class="card-header">
+            Job Detail
         </div>
-    </article>
+        <div class="card-body">
+            <p class="card-text">Your training job is configured and stored successfully.</p>
+            <p>Inputs: {% for input in inputs %}{{ input }}{% endfor %}</p>
+            <p>Output: {{ output }}</p>
+            <p>Algorithm: {{ algorithm }}</p>
+            <a href="#" class="btn btn-primary">See all job details</a>
+        </div>
+        <div class="card-footer text-muted">
+            2 days ago
+        </div>
+    </div>
 {% endblock content %}

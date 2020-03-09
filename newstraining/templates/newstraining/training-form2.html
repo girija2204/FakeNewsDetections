@@ -1,0 +1,40 @@
+{% extends "newstraining/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <form method="post">
+            {% csrf_token %}
+<!--            <fieldset class="form-group">-->
+<!--              <legend class="border-bottom mb-4">Configure Fake News Training</legend>-->
+<!--                {{ form|crispy }}-->
+<!--            </fieldset>-->
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Select Job Type</legend>
+                {{ form.job_types }}
+            </fieldset>
+            <fieldset class="form-group" id="tempId" style="display:none;">
+                <label for="PartyWalls">Configure a Training Schedule</label>
+                <nav>
+                  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-minutes-tab" data-toggle="tab" href="#nav-minutes" role="tab" aria-controls="nav-minutes" aria-selected="true">Minutes</a>
+                    <a class="nav-item nav-link" id="nav-hourly-tab" data-toggle="tab" href="#nav-hourly" role="tab" aria-controls="nav-hourly" aria-selected="false">Hourly</a>
+                    <a class="nav-item nav-link" id="nav-daily-tab" data-toggle="tab" href="#nav-daily" role="tab" aria-controls="nav-daily" aria-selected="false">Daily</a>
+<!--                    <a class="nav-item nav-link" id="nav-weekly-tab" data-toggle="tab" href="#nav-weekly" role="tab" aria-controls="nav-weekly" aria-selected="false">Weekly</a>-->
+                  </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                  <div class="tab-pane fade show active" id="nav-minutes" role="tabpanel" aria-labelledby="nav-minutes-tab">Every {{ form.time_field }} {{ form.unit_field }}</div>
+                  <div class="tab-pane fade" id="nav-hourly" role="tabpanel" aria-labelledby="nav-hourly-tab">{{ form.unit_field }}</div>
+                  <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">{{ form.job_codes }}</div>
+                </div>
+            </fieldset>
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Select Input types (multiple not allowed now)</legend>
+                {{ form.input_types }}
+            </fieldset>
+            <div class="form-group">
+               <button class="btn btn-outline-info" type="submit">Detect</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
