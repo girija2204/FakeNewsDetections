@@ -15,6 +15,7 @@ from logging.config import fileConfig
 from os import path
 import logging
 import configparser
+import requests
 
 # import os
 # os.environ.setdefault("DJANGO_SETTINGS_MODULE", __file__)
@@ -152,7 +153,7 @@ LOGIN_URL = "portal-login"
 
 configurationFilePath = path.join(BASE_DIR, "configurations.ini")
 logging.config.fileConfig(configurationFilePath, disable_existing_loggers=False)
-
+logging.getLogger("requests.packages.urllib3")
 LOG = logging
 
 CONFIG_PARSER = configparser.ConfigParser()

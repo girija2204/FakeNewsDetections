@@ -1,0 +1,29 @@
+{% extends "newsextractor/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Run Stat End Time</th>
+            <th>Run End Time</th>
+            <th>History Start Time</th>
+            <th>History End Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in run_details %}
+            <tr>
+                <td>{{r.runStartTime}}</td>
+                <td>{{r.runEndTime}}</td>
+                <td>{{r.historyStartTime}}</td>
+                <td>{{r.historyEndTime}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}
+
+runStartTime = models.DateTimeField(null=False)
+    runEndTime = models.DateTimeField(null=False)
+    historyStartTime = models.DateTimeField(null=True)
+    historyEndTime = models.DateTimeField(null=True)

@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -9,8 +9,9 @@ from newstraining.models.fndInput import FNDInput
 from newstraining.models.fndOutput import FNDOutput
 from newstraining.models.fndModel import FNDModel
 from newstraining.models.jobTypes import JobTypes
+from newstraining.models.fndRunDetail import FNDRunDetail
 from .forms import NewsPredictionForm, NewsTrainingForm
-from django.views.generic import FormView, DetailView, TemplateView, View
+from django.views.generic import FormView, DetailView, TemplateView, View, ListView
 from newstraining.fndContext import FNDContext
 from newstraining.algorithm.algorithmAdapter import AlgorithmAdapter
 from newstraining.trainingEnums import TrainingEnums
@@ -82,7 +83,8 @@ class NewsArticleTrainingFormView(LoginRequiredMixin, FormView):
             dnt = DailyTrainingJobs()
             t = threading.Thread(target=dnt.run,
                                  args=[selectedJobType, selectedAlgorithmType, selectedInputTypes,
-                                       selectedOutputType, selectedMin, selectedHour, selectedDailyHourField, selectedDailyMinField])
+                                       selectedOutputType, selectedMin, selectedHour, selectedDailyHourField,
+                                       selectedDailyMinField])
             t.start()
 
         elif configuration.fndType.lower() == TrainingEnums.MANUAL_TRAINING.value.lower():
@@ -130,3 +132,10 @@ class NewsArticlePredictionFormView(LoginRequiredMixin, FormView):
                 "date_posted": form.cleaned_data["date_posted"],
             }
             return render(request, self.success_url, context=context)
+
+
+class RunDetailsListView(LoginRequiredMixin, ListView):
+    model = FNDRunDetail
+    template_name = "newstraining/recent_run_details.html"
+    context_object_name = "run_details"
+    # ordering = ["-date_posted"]

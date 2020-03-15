@@ -184,3 +184,22 @@ a.article-title:hover {
     margin-bottom: 40px;
     text-decoration: underline;
 }
+
+#prediction-result{
+    text-align: center;
+}
+
+.filter-tabs{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.filter-tabs .fake_real{
+    margin: 5px;
+}
+
+.main_contents{
+    display: inline;
+}

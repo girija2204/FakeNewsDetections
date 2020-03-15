@@ -14,14 +14,18 @@
                 <p class="article-content">CONTENT: {{ content }}</p>
             </div>
         </article>
-        {% if classPredicted == 1 %}
-            <article class="media content-section" style="background: #ffc107">
-               <p class="predicted-1" align="right" style="border-radius: 5px;text-decoration-line: underline;
-                    font-size: x-large;font-weight: 700;padding-left: 34%;color: #373638;">FAKE STATUS: TRUE</p></article>
-        {% else %}
-            <article class="media content-section" style="background: #ffc107">
-                <p class="predicted-2" align="right" style="border-radius: 5px;text-decoration-line: underline;
-                    font-size: x-large;font-weight: 700;padding-left: 34%;color: #373638;">FAKE STATUS: FALSE</p>
-            </article>
-        {% endif %}
+        <div class="card">
+            <div class="card-body" id="prediction-result" style="text-align: center;">
+                <h5 class="card-title">Prediction Result</h5>
+                {% if classPredicted == 1 %}
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        FAKE STATUS: TRUE
+                    </h6>
+                {% else %}
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        FAKE STATUS: FALSE
+                    </h6>
+                {% endif %}
+            </div>
+        </div>
 {% endblock content %}

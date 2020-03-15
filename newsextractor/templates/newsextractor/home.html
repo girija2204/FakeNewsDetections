@@ -1,21 +1,31 @@
 {% extends "newsextractor/base.html" %}
 {% block content %}
+    <div>
+        {% if user.is_authenticated %}
+        <div class="filter-tabs">
+            <button class="list-group-item list-group-item-light fake_real active" id="all">All Articles</button>
+            <button class="list-group-item list-group-item-light fake_real" id="fake">Fake Articles</button>
+            <button class="list-group-item list-group-item-light fake_real" id="real">Real Articles</button>
+        </div>
+        {% endif %}
+    </div>
     {% if user.is_authenticated %}
-        {% for news in news_articles %}
-            <article class="media content-section">
-                <div class="media-body">
-                <div class="article-metadata">
-                    <a class="mr-2" href="{% url 'newsarticles-detail' news.id %}">{{ news.title }}</a>
-                    <div class="text-muted">
-                        <small class="text-muted">{{ news.author }},</small>
-                        <small class="text-muted">{{ news.date_posted }}</small>
+        <ul id="news_articles">
+            {% for news in news_articles %}
+                <li class="media content-section article">
+                    <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="{% url 'newsarticles-detail' news.id %}">{{ news.title }}</a>
+                        <div class="text-muted">
+                            <small class="text-muted">{{ news.author }},</small>
+                            <small class="text-muted">{{ news.date_posted }}</small>
+                        </div>
                     </div>
-                </div>
-    <!--            <p class="article-content">{{ news.content }}</p>-->
-                <small>Fake Status: {{ news.fake_status }}</small>
-                </div>
-            </article>
-        {% endfor %}
+                    Fake Status: <small class="fake_status">{{ news.fake_status }}</small>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
     {% else %}
         <h2>You are not logged in.</h2>
         <div class="border-top pt-3">
